@@ -3,34 +3,42 @@
   var Animation = function () {
     // do all your animation in this function. Including any calls to get DOM elements.
     var render = function () {
-      var ctaButton = document.getElementById('cta');
-      var overHandler = function () {
-        ctaButton.classList.add('cta-hover');
-      };
-
-      var outHandler = function () {
-        ctaButton.classList.remove('cta-hover');
-      };
+      
 
       var onComplete = function () {
         console.log('animation complete');
-        ctaButton.addEventListener('mouseover', overHandler);
-        ctaButton.addEventListener('mouseout', outHandler);
+        
       };
 
       var onStart = function () {
-        document.getElementById('catchAll').addEventListener('click', clickHandler);
-        ctaButton.addEventListener('click', clickHandler);
-        ctaButton.addEventListener('click', outHandler);
+        
       };
       
+      TweenLite.set( ".box", { transformOrigin:"50% 50%" } );
+      TweenLite.to( '#adRoot', 0.15, { opacity: 1 });
       var tl = null;
       // make additional timeline here.
       tl = new TimelineLite({
         onComplete: onComplete,
-        onStart: onStart
+        onStart: onStart,
+        //paused: true
       });
-      tl.add(TweenLite.to('#adRoot', 1, {opacity: 1}));
+
+      tl.addLabel( "start", 0 );
+
+      tl.addLabel( "scaleDownBoxes", 0.25 );
+
+      tl.staggerFromTo( ".box", 1.2, { scale:1 }, { smoothify:true, scale:0.35, ease:Elastic.easeOut.config (0.8, 0.5) }, -0.05 );
+
+      tl.addLabel( "rotateBoxes" )
+      tl.staggerFromTo( ".box", 1, { rotation:0 }, { smoothify:true, rotation:180, ease:Power2.easeOut }, -0.07, "rotateBoxes" );
+
+      tl.addLabel( "scaleOutBoxes" );
+      tl.staggerFromTo( ".box", 1, { immediateRender:false, scaleX:0.35 }, { smoothify:true, scaleX:0, ease:Power4.easeInOut }, -0.1, "scaleOutBoxes" );
+
+
+      controller( tl );
+
       //customize this function so that when called it kills all animation timelines, etc.
       return function destroy() {
         console.log('Kill Animations');

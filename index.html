@@ -16,25 +16,49 @@
 </head>
 <body>
 <div id="adRoot">
-  <div class="bg-image"></div>
-  <div class="logo-sprite"></div>
-  <div class="logo-sprite-retina"></div>
-  <div id="catchAll" class="catch-all hidden"></div>
-  <div id="cta" class="cta hidden">click here</div>
+
+  <div id="animation-container">
+    <div class="box" id="blue-box"></div>
+    <div class="box" id="pink-box"></div>
+    <div class="box" id="black-box"></div>
+  </div>
+
 </div>
 <div id="border-top" class="top-collapsed-border invisible"></div>
 <div id="border-left" class="left-collapsed-border invisible"></div>
 <div id="border-right" class="right-collapsed-border invisible"></div>
 <div id="border-bottom" class="bottom-collapsed-border invisible"></div>
+
+<div id="timeline-controller">
+  <div id="tc-header">-</div>
+
+  <div id="tc-play-toggle">
+    <div id="tcPlayPauseIcons">
+      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="8px" height="16px" viewBox="0 0 8 16" enable-background="new 0 0 8 16" xml:space="preserve">
+        <path class="tc-play-icon" d="M0,0l8,8l-8,8V0z"/>
+        <path class="tc-pause-icon" d="M8,16H5V0h3V16z"/>
+        <path class="tc-pause-icon" d="M3,16H0V0h3V16z"/>
+      </svg>
+    </div>
+    <div id="playPauseBtn" class="tc-button"></div>
+  </div>
+  
+  <div id="tc-progress-container">
+    <div id="tc-playhead"></div>
+  </div>
+  <div id="tc-current-time"></div>
+  <div id="tc-total-time"></div>
+</div>
+
+
 <!--Uncomment this to use CDN version of Greensock, remove local version if you do this.  -->
 <!--<script src="https://s0.2mdn.net/ads/studio/cached_libs/tweenmax_1.19.0_643d6911392a3398cb1607993edabfa7_min.js"></script>-->
 <!-- build:js combined.js -->
 <script type="text/javascript" src="libs/vendor/bowser.min.js"></script>
 <!-- If you don't need this you can remove it -->
-<script type="text/javascript" src="libs/vendor/greensock/TweenLite.min.js"></script>
-<script type="text/javascript" src="libs/vendor/greensock/TimelineLite.min.js"></script>
-<script type="text/javascript" src="libs/vendor/greensock/plugins/CSSPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
 <script type="text/javascript" src="libs/vendor/SmoothifyPlugin.js"></script>
+<script type="text/javascript" src="libs/TimelineController.js"></script>
 <script type="text/javascript" src="libs/Animation.js"></script>
 <script type="text/javascript" src="libs/Ad.js"></script>
 <!-- endbuild -->
