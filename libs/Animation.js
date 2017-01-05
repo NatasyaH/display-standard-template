@@ -37,7 +37,7 @@
       tl.staggerFromTo( ".box", 1, { immediateRender:false, scaleX:0.35 }, { smoothify:true, scaleX:0, ease:Power4.easeInOut }, -0.1, "scaleOutBoxes" );
 
 
-      controller( tl );
+      controller( tl, { x:0, y:280 } );
 
       //customize this function so that when called it kills all animation timelines, etc.
       return function destroy() {
