@@ -62,6 +62,14 @@ var controller = function( tl, pos ) {
 			labelsContainer.appendChild( div );
 		}
 	};
+
+	var createDomElement = function( id, css, container ) {
+		var div = document.createElement( 'div' );
+		div.id = id;
+		div.style.cssText = css;
+		container.appendChild( div );
+		return div;
+	};
 	
 	(function(){
 		addDomElements();
@@ -184,114 +192,93 @@ var controller = function( tl, pos ) {
 
 	function addDomElements() {
 
-		container = document.createElement( 'div' );
-		container.id = "tc-container";
-		container.style.width = "400px";
-		container.style.height = "100px";
-		container.style.position = "absolute";
-		container.style.left = position.x + "px";
-		container.style.top = position.y + "px";
-		container.style.backgroundColor = "#0e2b50";
-		container.style.color = "#FFFFFF";
-		container.style.font = "12px arial, serif";
-		document.body.appendChild( container );
+		var containerCss = 'width:400px;'+
+							'height:100px;'+
+							'position:absolute;'+
+							'left:'+position.x+'px;'+
+							'top:'+position.y+'px;'+
+							'background-color:#0E2B50;'+
+							'color:#FFFFFF;'+
+							'font:12px arial,serif;';
+		container = createDomElement( "tc-container", containerCss, document.body );
 
-		var header = document.createElement( 'div' );
-		header.style.width = "392px";
-		header.style.height = "12px";
-		header.style.backgroundColor = "#020714";
-		header.style.padding = "4px";
-		header.style.borderBottom = "1px solid #3467A5";
-		header.style.fontSize = "10px";
-		header.style.color = "#75d5ff";
+		var headerCss = 'width:392px;'+
+						'height:12px;'+
+						'background-color:#020714;'+
+						'color:#75d5ff;'+
+						'padding:4px;'+
+						'border-bottom:1px solid #3467A5;'+
+						'font-size:10px;'+
+						'color:#75d5ff;';
+		var header = createDomElement( "tc-header", headerCss, container );
 		header.innerHTML = "GSAP Timeline Controller";
-		container.appendChild( header );
 
-		playToggleContainer = document.createElement( 'div' );
-		playToggleContainer.id = "tc-playToggleContainer";
-		playToggleContainer.style.width = "30px";
-		playToggleContainer.style.height = "30px";
-		playToggleContainer.style.backgroundColor = "#b0008d";
-		playToggleContainer.style.position = "absolute";
-		playToggleContainer.style.top = "42px";
-		playToggleContainer.style.left = "5px";
+		var playToggleCss = 'width:30px;'+
+							'height:30px;'+
+							'background-color:#b0008d;'+
+							'position:absolute;'+
+							'top:42px;'+
+							'left:5px;';
+		playToggleContainer = createDomElement( "tc-playToggleContainer", playToggleCss, container );
 
-		playToggleIcons = document.createElement( 'div' );
-		playToggleIcons.id = "tc-playToggleIcons";
-		playToggleIcons.style.width = "8px";
-		playToggleIcons.style.height = "16px";
-		playToggleIcons.style.position = "absolute";
-		playToggleIcons.style.top = "7px";
-		playToggleIcons.style.left = "11px";
-		playToggleIcons.innerHTML = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="8px" height="16px" viewBox="0 0 8 16" enable-background="new 0 0 8 16" xml:space="preserve"><path class="tc-play-icon" fill="#FFFFFF" d="M0,0l8,8l-8,8V0z"/><path class="tc-pause-icon" fill="#FFFFFF" d="M8,16H5V0h3V16z"/><path class="tc-pause-icon" fill="#FFFFFF" d="M3,16H0V0h3V16z"/></svg>'
-		playToggleContainer.appendChild( playToggleIcons );
+		var playIconsCss =  'width:8px;'+
+							'height:16px;'+
+							'position:absolute;'+
+							'top:7px;'+
+							'left:11px;';
+		playToggleIcons = createDomElement( "tc-playToggleIcons", playIconsCss, playToggleContainer );
+		playToggleIcons.innerHTML = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="8px" height="16px" viewBox="0 0 8 16" enable-background="new 0 0 8 16" xml:space="preserve"><path class="tc-play-icon" fill="#FFFFFF" d="M0,0l8,8l-8,8V0z"/><path class="tc-pause-icon" fill="#FFFFFF" d="M8,16H5V0h3V16z"/><path class="tc-pause-icon" fill="#FFFFFF" d="M3,16H0V0h3V16z"/></svg>';
 
-		playToggleButton = document.createElement( 'div' );
-		playToggleButton.id = "tc-playToggleButton";
-		playToggleButton.style.width = "100%";
-		playToggleButton.style.height = "100%";
-		playToggleButton.style.position = "absolute";
-		playToggleButton.style.top = "0px";
-		playToggleButton.style.left = "0px";
-		playToggleButton.style.cursor = "pointer";
-		playToggleContainer.appendChild( playToggleButton );
+		var playButtonCss = 'width:100%;'+
+							'height:100%;'+
+							'position:absolute;'+
+							'top:0px;'+
+							'left:0px;'+
+							'cursor:pointer;';
+		playToggleButton = createDomElement( "tc-playToggleButton", playButtonCss, playToggleContainer );
 
-		container.appendChild( playToggleContainer );
+		var progressContainerCss = 	'width:355px;'+
+									'height:30px;'+
+									'line-height:30px;'+
+									'position:absolute;'+
+									'top:42px;'+
+									'left:40px;'+
+									'background-color:#000000;'+
+									'cursor:pointer;';
+		progressContainer = createDomElement( "tc-progressContainer", progressContainerCss, container );
 
-		progressContainer = document.createElement( 'div' );
-		progressContainer.id = "tc-progressContainer";
-		progressContainer.style.width = "355px";
-		progressContainer.style.height = "30px";
-		progressContainer.style.lineHeight = "30px";
-		progressContainer.style.position = "absolute";
-		progressContainer.style.top = "42px";
-		progressContainer.style.left = "40px";
-		progressContainer.style.cursor = "pointer";
-		progressContainer.style.backgroundColor = "#000000";
+		var progressBarCss = 'width:1px;'+
+							 'height:100%;'+
+							 'position:absolute;'+
+							 'top:0px;'+
+							 'left:0px;'+
+							 'background-color:#FF00CC;';
+		progressBar = createDomElement( "tc-progressContainer", progressBarCss, progressContainer );
 
-		progressBar = document.createElement( 'div' );
-		progressBar.id = "tc-progressBar";
-		progressBar.style.width = "1px";
-		progressBar.style.height = "100%";
-		progressBar.style.backgroundColor = "#FF00CC";
-		progressBar.style.position = "absolute";
-		progressBar.style.top = "0px";
-		progressBar.style.left = "0px";
-		progressContainer.appendChild( progressBar );
+		var labelsContainerCss = 'width:355px;'+
+							 	 'height:15px;'+
+							 	 'position:absolute;'+
+							 	 'top:72px;'+
+							 	 'left:40px;';
+		labelsContainer = createDomElement( "tc-labelsContainer", labelsContainerCss, container );
+
+		var timeContainerCss =  'position:absolute;'+
+							 	'top:52px;'+
+							 	'left:42px;'+
+							 	'font-size:10px;';
+		timeContainer = createDomElement( "tc-timeContainer", timeContainerCss, container );
+
+		var durationContainerCss = 	'position:absolute;'+
+							 		'top:52px;'+
+							 		'right:8px;'+
+							 		'font-size:10px;';
+		durationContainer = createDomElement( "tc-durationContainer", durationContainerCss, container );
+
+		var loopCheckboxCss = 'position:absolute;'+
+							  'top:23px;'+
+							  'right:5px;';
+		loopCheckBoxContainer = createDomElement( "tc-loopCheckBoxContainer", loopCheckboxCss, container );
 		
-		container.appendChild( progressContainer );
-		
-		labelsContainer = document.createElement( 'div' );
-		labelsContainer.id = "labelsContainer";
-		labelsContainer.style.width = "355px";
-		labelsContainer.style.height = "15px";
-		labelsContainer.style.position = "absolute";
-		labelsContainer.style.top = "72px";
-		labelsContainer.style.left = "40px";
-		container.appendChild( labelsContainer );
-
-		timeContainer = document.createElement( 'div' );
-		timeContainer.id = "tc-timeContainer";
-		timeContainer.style.position = "absolute";
-		timeContainer.style.top = "52px";
-		timeContainer.style.left = "42px";
-		timeContainer.style.fontSize = "10px";
-		container.appendChild( timeContainer );
-
-		durationContainer = document.createElement( 'div' );
-		durationContainer.id = "tc-durationContainer";
-		durationContainer.style.position = "absolute";
-		durationContainer.style.top = "52px";
-		durationContainer.style.right = "8px";
-		durationContainer.style.fontSize = "10px";
-		container.appendChild( durationContainer );
-
-		loopCheckBoxContainer = document.createElement( 'div' );
-		loopCheckBoxContainer.id = "loopCheckBoxContainer";
-		loopCheckBoxContainer.style.position = "absolute";
-		loopCheckBoxContainer.style.right = "5px";
-		loopCheckBoxContainer.style.top = "23px";
-
 		loopCheckBoxLabel = document.createElement( 'label' );
 		loopCheckBoxLabel.style.fontSize = "10px";
 		loopCheckBoxLabel.innerHTML = "Loop";
@@ -301,14 +288,6 @@ var controller = function( tl, pos ) {
 		loopCheckBoxInput.type = "checkbox";
 		loopCheckBoxInput.checked = true;
 		loopCheckBoxContainer.appendChild( loopCheckBoxInput );
-
-		container.appendChild( loopCheckBoxContainer );
-
-
-		/*<label class="label--checkbox">
-          <input type="checkbox" class="checkbox" checked>
-            Item 1
-      </label>*/
 
 	};
 }
