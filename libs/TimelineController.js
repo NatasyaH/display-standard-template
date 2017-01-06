@@ -11,6 +11,8 @@ var controller = function( tl, pos ) {
 	var progressBar = null;
 	var timeContainer = null;
 	var durationContainer = null;
+	var labelsContainer = null;
+	var frameLabels = null;
 
 	var progressOffsetX = 0;
 
@@ -30,10 +32,36 @@ var controller = function( tl, pos ) {
 		progressContainer.addEventListener( 'mousedown', progressMouseDownHandler );
 	};
 
+	var addFrameLabels = function() {
+		var labels = timeline.getLabelsArray();
+		var name, time, value, html;
+		for (var i = 0; i < labels.length; i++) {
+		    name = labels[ i ].name;
+		    time = labels[ i ].time;
+		    value = Math.floor( (time/timeline.duration()) * 100 );
+		    var div = document.createElement( 'div' );
+		    div.style.position = "absolute";
+		    div.style.left = value + "%";
+		    div.style.top = "0";
+			div.style.borderLeft = "1px solid #FFFFFF";
+			div.style.marginLeft = "-1px";
+			div.style.paddingLeft = "1px";
+			div.style.color = "#00CCFF";
+			div.style.fontSize = "9px";
+			div.style.cursor = "pointer";
+			div.innerHTML = name;
+			div.addEventListener( "click", labelClickedHandler );
+			div.addEventListener( "mouseover", labelOverHandler );
+			div.addEventListener( "mouseout", labelOutHandler );
+			labelsContainer.appendChild( div );
+		}
+	};
+
 	(function(){
 		addDomElements();
 		addListeners();
 		updateDuration();
+		addFrameLabels();
 	})();
 
 	function update() {
@@ -56,11 +84,11 @@ var controller = function( tl, pos ) {
 	}
 
 	function playToggleOverHandler() {
-		TweenMax.to( playToggleContainer, 0.2, { smoothify:true, backgroundColor:"#5adeff", ease:Power2.easeOut } );
+		TweenMax.to( playToggleContainer, 0.2, { backgroundColor:"#FF00CC", ease:Power2.easeOut } );
 	}
 
 	function playToggleOutHandler() {
-		TweenMax.to( playToggleContainer, 0.2, { smoothify:true, backgroundColor:"#00CCFF", ease:Power2.easeOut } );
+		TweenMax.to( playToggleContainer, 0.2, { backgroundColor:"#b0008d", ease:Power2.easeOut } );
 	}
 
 	function playToggleClickHandler() {
@@ -75,6 +103,20 @@ var controller = function( tl, pos ) {
 			paused = true;
 		}
 		updatePlayIcon();
+	}
+
+	function labelClickedHandler( e ) {
+		seek( e.target.innerHTML );
+	}
+
+	function labelOverHandler( e ) {
+		var label = e.target;
+		TweenMax.to( label, 0.25, { color:"#FFFFFF", ease:Power2.easeOut } );
+	}
+
+	function labelOutHandler( e ) {
+		var label = e.target;
+		TweenMax.to( label, 0.25, { color:"#00CCFF", ease:Power2.easeOut } );
 	}
 
 	function updateTime() {
@@ -133,7 +175,7 @@ var controller = function( tl, pos ) {
 		container = document.createElement( 'div' );
 		container.id = "tc-container";
 		container.style.width = "400px";
-		container.style.height = "200px";
+		container.style.height = "75px";
 		container.style.position = "absolute";
 		container.style.left = position.x + "px";
 		container.style.top = position.y + "px";
@@ -157,7 +199,7 @@ var controller = function( tl, pos ) {
 		playToggleContainer.id = "tc-playToggleContainer";
 		playToggleContainer.style.width = "30px";
 		playToggleContainer.style.height = "30px";
-		playToggleContainer.style.backgroundColor = "#00CCFF";
+		playToggleContainer.style.backgroundColor = "#b0008d";
 		playToggleContainer.style.position = "absolute";
 		playToggleContainer.style.top = "26px";
 		playToggleContainer.style.left = "5px";
@@ -169,7 +211,7 @@ var controller = function( tl, pos ) {
 		playToggleIcons.style.position = "absolute";
 		playToggleIcons.style.top = "7px";
 		playToggleIcons.style.left = "11px";
-		playToggleIcons.innerHTML = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="8px" height="16px" viewBox="0 0 8 16" enable-background="new 0 0 8 16" xml:space="preserve"><path class="tc-play-icon" d="M0,0l8,8l-8,8V0z"/><path class="tc-pause-icon" d="M8,16H5V0h3V16z"/><path class="tc-pause-icon" d="M3,16H0V0h3V16z"/></svg>'
+		playToggleIcons.innerHTML = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="8px" height="16px" viewBox="0 0 8 16" enable-background="new 0 0 8 16" xml:space="preserve"><path class="tc-play-icon" fill="#FFFFFF" d="M0,0l8,8l-8,8V0z"/><path class="tc-pause-icon" fill="#FFFFFF" d="M8,16H5V0h3V16z"/><path class="tc-pause-icon" fill="#FFFFFF" d="M3,16H0V0h3V16z"/></svg>'
 		playToggleContainer.appendChild( playToggleIcons );
 
 		playToggleButton = document.createElement( 'div' );
@@ -192,6 +234,7 @@ var controller = function( tl, pos ) {
 		progressContainer.style.position = "absolute";
 		progressContainer.style.top = "26px";
 		progressContainer.style.left = "40px";
+		progressContainer.style.cursor = "pointer";
 		progressContainer.style.backgroundColor = "#000000";
 
 		progressBar = document.createElement( 'div' );
@@ -203,13 +246,22 @@ var controller = function( tl, pos ) {
 		progressBar.style.top = "0px";
 		progressBar.style.left = "0px";
 		progressContainer.appendChild( progressBar );
-
+		
 		container.appendChild( progressContainer );
+		
+		labelsContainer = document.createElement( 'div' );
+		labelsContainer.id = "labelsContainer";
+		labelsContainer.style.width = "355px";
+		labelsContainer.style.height = "15px";
+		labelsContainer.style.position = "absolute";
+		labelsContainer.style.top = "57px";
+		labelsContainer.style.left = "40px";
+		container.appendChild( labelsContainer );
 
 		timeContainer = document.createElement( 'div' );
 		timeContainer.id = "tc-timeContainer";
 		timeContainer.style.position = "absolute";
-		timeContainer.style.top = "58px";
+		timeContainer.style.top = "43px";
 		timeContainer.style.left = "42px";
 		timeContainer.style.fontSize = "10px";
 		container.appendChild( timeContainer );
@@ -217,8 +269,8 @@ var controller = function( tl, pos ) {
 		durationContainer = document.createElement( 'div' );
 		durationContainer.id = "tc-durationContainer";
 		durationContainer.style.position = "absolute";
-		durationContainer.style.top = "58px";
-		durationContainer.style.right = "5px";
+		durationContainer.style.top = "43px";
+		durationContainer.style.right = "8px";
 		durationContainer.style.fontSize = "10px";
 		container.appendChild( durationContainer );
 

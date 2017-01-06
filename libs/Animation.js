@@ -14,11 +14,11 @@
         
       };
       
-      TweenLite.set( ".box", { transformOrigin:"50% 50%" } );
-      TweenLite.to( '#adRoot', 0.15, { opacity: 1 });
+      TweenMax.set( ".box", { transformOrigin:"50% 50%" } );
+      TweenMax.to( '#adRoot', 0.15, { opacity: 1 });
       var tl = null;
       // make additional timeline here.
-      tl = new TimelineLite({
+      tl = new TimelineMax({
         onComplete: onComplete,
         onStart: onStart,
         //paused: true
@@ -38,6 +38,7 @@
 
 
       controller( tl, { x:0, y:280 } );
+
 
       //customize this function so that when called it kills all animation timelines, etc.
       return function destroy() {
