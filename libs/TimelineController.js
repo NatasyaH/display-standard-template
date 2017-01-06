@@ -9,10 +9,129 @@ var controller = function( tl, pos ) {
 	var playToggleButton = null;
 	var progressContainer = null;
 	var progressBar = null;
+	var timeContainer = null;
+	var durationContainer = null;
 
-	var addDomElements = function() {
+	var progressOffsetX = 0;
+
+	var complete = false;
+	var paused = false;
+	
+	var addListeners = function() {
+
+		playToggleButton.addEventListener( 'mouseover', playToggleOverHandler );
+		playToggleButton.addEventListener( 'mouseout',  playToggleOutHandler );
+		playToggleButton.addEventListener( 'click',     playToggleClickHandler );
+
+		timeline.eventCallback( 'onUpdate', update );
+		timeline.eventCallback( 'onComplete', onComplete );
+		timeline.eventCallback( 'onStart', onStart );
+
+		progressContainer.addEventListener( 'mousedown', progressMouseDownHandler );
+	};
+
+	(function(){
+		addDomElements();
+		addListeners();
+		updateDuration();
+	})();
+
+	function update() {
+		var p = timeline.progress();
+		var t = timeline.time();
+		var d = timeline.duration();
+		var w = (p*100)+"%";
+		progressBar.style.width = w;
+		updateTime();
+	}
+
+	function onStart() {
+		complete = false;
+		updatePlayIcon();
+	}
+
+	function onComplete() {
+		complete = true;
+		updatePlayIcon();
+	}
+
+	function playToggleOverHandler() {
+		TweenMax.to( playToggleContainer, 0.2, { smoothify:true, backgroundColor:"#5adeff", ease:Power2.easeOut } );
+	}
+
+	function playToggleOutHandler() {
+		TweenMax.to( playToggleContainer, 0.2, { smoothify:true, backgroundColor:"#00CCFF", ease:Power2.easeOut } );
+	}
+
+	function playToggleClickHandler() {
+		if( timeline.paused() ) {
+			timeline.play();
+			paused = false;
+		} else if( complete === true ) {
+			timeline.restart();
+			paused = false;
+		} else {
+			timeline.pause();
+			paused = true;
+		}
+		updatePlayIcon();
+	}
+
+	function updateTime() {
+		var time = timeline.time();
+		var sec = Math.floor( time );
+		var mil = (time % 1).toFixed(2).substring(2);
+		timeContainer.innerHTML = sec + ":" + mil;
+	}
+
+	function updateDuration() {
+		var dur = timeline.duration();
+		var sec = Math.floor( dur );
+		var mil = (dur % 1).toFixed(2).substring(2);
+		durationContainer.innerHTML = sec + ":" + mil;
+	}
+
+	function updatePlayIcon() {
+		if( paused === true || complete === true ) {
+			TweenMax.set( ".tc-play-icon", { autoAlpha:1 } );
+			TweenMax.set( ".tc-pause-icon", { autoAlpha:0 } );
+		} else {
+			TweenMax.set( ".tc-play-icon", { autoAlpha:0 } );
+			TweenMax.set( ".tc-pause-icon", { autoAlpha:1 } );
+		}
+	}
+
+	function progressMouseDownHandler( e ){
+		progressOffsetX = e.pageX - e.offsetX;
+		document.body.addEventListener( 'mousemove', progressMouseMoveHandler );
+		document.body.addEventListener( 'mouseup', progressMouseUpHandler );
+		progressMouseMoveHandler( e );
+	}
+
+	function progressMouseMoveHandler( e ) {
+		var w = progressContainer.offsetWidth;
+		var x = e.pageX - progressOffsetX;
+		var p = x/w;
+		var t = timeline.totalDuration() * p;
+		seek( t, true );
+	}
+
+	function progressMouseUpHandler( e ) {
+		document.body.removeEventListener( 'mousemove', progressMouseMoveHandler );
+		document.body.removeEventListener( 'mouseup', progressMouseUpHandler );
+		if( paused === false ) timeline.resume();
+	}
+
+	function seek( time, pause ){
+		timeline.seek( time );
+		if( pause ) timeline.pause();
+		update();
+	}
+
+	function addDomElements() {
 
 		container = document.createElement( 'div' );
+		container.id = "tc-container";
 		container.style.width = "400px";
 		container.style.height = "200px";
 		container.style.position = "absolute";
@@ -35,14 +154,16 @@ var controller = function( tl, pos ) {
 		container.appendChild( header );
 
 		playToggleContainer = document.createElement( 'div' );
+		playToggleContainer.id = "tc-playToggleContainer";
 		playToggleContainer.style.width = "30px";
 		playToggleContainer.style.height = "30px";
-		playToggleContainer.style.backgroundColor = "#2DA5DA";
+		playToggleContainer.style.backgroundColor = "#00CCFF";
 		playToggleContainer.style.position = "absolute";
 		playToggleContainer.style.top = "26px";
 		playToggleContainer.style.left = "5px";
 
 		playToggleIcons = document.createElement( 'div' );
+		playToggleIcons.id = "tc-playToggleIcons";
 		playToggleIcons.style.width = "8px";
 		playToggleIcons.style.height = "16px";
 		playToggleIcons.style.position = "absolute";
@@ -52,6 +173,7 @@ var controller = function( tl, pos ) {
 		playToggleContainer.appendChild( playToggleIcons );
 
 		playToggleButton = document.createElement( 'div' );
+		playToggleButton.id = "tc-playToggleButton";
 		playToggleButton.style.width = "100%";
 		playToggleButton.style.height = "100%";
 		playToggleButton.style.position = "absolute";
@@ -63,6 +185,7 @@ var controller = function( tl, pos ) {
 		container.appendChild( playToggleContainer );
 
 		progressContainer = document.createElement( 'div' );
+		progressContainer.id = "tc-progressContainer";
 		progressContainer.style.width = "355px";
 		progressContainer.style.height = "30px";
 		progressContainer.style.lineHeight = "30px";
@@ -70,144 +193,34 @@ var controller = function( tl, pos ) {
 		progressContainer.style.top = "26px";
 		progressContainer.style.left = "40px";
 		progressContainer.style.backgroundColor = "#000000";
+
+		progressBar = document.createElement( 'div' );
+		progressBar.id = "tc-progressBar";
+		progressBar.style.width = "1px";
+		progressBar.style.height = "100%";
+		progressBar.style.backgroundColor = "#FF00CC";
+		progressBar.style.position = "absolute";
+		progressBar.style.top = "0px";
+		progressBar.style.left = "0px";
+		progressContainer.appendChild( progressBar );
+
 		container.appendChild( progressContainer );
 
-	}
+		timeContainer = document.createElement( 'div' );
+		timeContainer.id = "tc-timeContainer";
+		timeContainer.style.position = "absolute";
+		timeContainer.style.top = "58px";
+		timeContainer.style.left = "42px";
+		timeContainer.style.fontSize = "10px";
+		container.appendChild( timeContainer );
 
-	addDomElements();
+		durationContainer = document.createElement( 'div' );
+		durationContainer.id = "tc-durationContainer";
+		durationContainer.style.position = "absolute";
+		durationContainer.style.top = "58px";
+		durationContainer.style.right = "5px";
+		durationContainer.style.fontSize = "10px";
+		container.appendChild( durationContainer );
 
+	};
 }
-
-
-
-/*var controller = function( timeline ) {
-	
-	var container = document.getElementById( 'timeline-controller' );
-	var playToggle = document.getElementById( 'tc-play-toggle' );
-	var isPlaying = false;
-
-	var playhead = document.getElementById( 'tc-playhead' );
-	var progressTimeline = document.getElementById( 'tc-progress-container' );
-	var progressOffsetX = 0;
-
-	var durationContainer = document.getElementById( 'tc-total-time' );
-	var timeContainer = document.getElementById( 'tc-current-time' );
-
-	// ********* TIMELINES **********
-	var playToggleBgTimeline = new TimelineMax( { paused:true } );
-	playToggleBgTimeline.addLabel( "over", 0 );
-	playToggleBgTimeline.to( playToggle, 0.2, { smoothify:true, backgroundColor:"#27c1b9", ease:Power2.easeOut }, "over" );
-	playToggleBgTimeline.addPause("+=0");
-	playToggleBgTimeline.addLabel( "out" );
-	playToggleBgTimeline.to( playToggle, 0.2, { smoothify:true, backgroundColor:"#2da5da", ease:Power2.easeOut }, "out" );
-	playToggleBgTimeline.addPause("+=0");
-
-	playToggle.addEventListener( 'mouseover', playToggleOverHandler );
-	playToggle.addEventListener( 'mouseout',  playToggleOutHandler );
-	playToggle.addEventListener( 'click',     playToggleClickHandler );
-
-	timeline.eventCallback( 'onUpdate', update );
-	timeline.eventCallback( 'onComplete', onComplete );
-	timeline.eventCallback( 'onStart', onStart );
-
-	progressTimeline.addEventListener( 'mousedown', timelineMouseDownHandler );
-	
-	
-	// ********* EVENT HANDLERS **********
-	
-	function update() {
-		var p = timeline.progress();
-		var t = timeline.time();
-		var d = timeline.duration();
-
-		var w = (p*100)+"%";
-		playhead.style.width = w;
-
-		updateTime();
-	}
-
-	function onStart() {
-		togglePlayIcon();
-		isPlaying = true;
-		updateDuration();
-	}
-
-	function onComplete() {
-		togglePlayIcon();
-		timeline.restart();
-	}
-
-	function playToggleOverHandler() {
-		playToggleBgTimeline.play("over");
-	}
-
-	function playToggleOutHandler() {
-		playToggleBgTimeline.play("out");
-	}
-
-	function playToggleClickHandler() {
-		if( isPlaying ) {
-			timeline.pause();
-		} else {
-			timeline.play();
-		}
-		togglePlayIcon();
-	}
-
-	function togglePlayIcon() {
-		if( isPlaying ) {
-			TweenMax.to( '.tc-play-icon', 0.2, { autoAlpha:1 } );
-			TweenMax.to( '.tc-pause-icon', 0.2, { autoAlpha:0 } );
-			isPlaying = false;
-		} else {
-			TweenMax.to( '.tc-play-icon', 0.2, { autoAlpha:0 } );
-			TweenMax.to( '.tc-pause-icon', 0.2, { autoAlpha:1 } );
-			isPlaying = true;
-		}
-	}
-
-	function timelineMouseDownHandler( e ){
-		progressOffsetX = e.pageX - e.offsetX;
-		document.body.addEventListener( 'mousemove', timelineMouseMoveHandler );
-		document.body.addEventListener( 'mouseup', timelineMouseUpHandler );
-		timelineMouseMoveHandler( e );
-	}
-
-	function timelineMouseMoveHandler( e ) {
-		var w = progressTimeline.offsetWidth;
-		var x = e.pageX - progressOffsetX;
-		var p = x/w;
-		var t = timeline.totalDuration() * p;
-		seek( t, true );
-	}
-
-	function timelineMouseUpHandler( e ) {
-		document.body.removeEventListener( 'mousemove', timelineMouseMoveHandler );
-		document.body.removeEventListener( 'mouseup', timelineMouseUpHandler );
-		if( timeline.paused() ) timeline.resume();
-	}
-
-	function seek( time, pause ){
-		timeline.seek( time );
-		if( pause ) timeline.pause();
-		update();
-	}
-
-	function updateTime() {
-		var time = timeline.time();
-		var sec = Math.floor( time );
-		var mil = (time % 1).toFixed(2).substring(2);
-		timeContainer.innerHTML = sec + ":" + mil;
-	}
-
-	function updateDuration() {
-		var dur = timeline.duration();
-		var sec = Math.floor( dur );
-		var mil = (dur % 1).toFixed(2).substring(2);
-		durationContainer.innerHTML = sec + ":" + mil;
-	}
-
-	function addDomElements() {
-
-	}
-}*/
