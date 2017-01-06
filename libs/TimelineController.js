@@ -1,5 +1,8 @@
 var controller = function( tl, pos ) {
 
+	var css = document.createElement( 'style' );
+	css.innerHTML = ""
+
 	var timeline = tl;
 	var position = pos || { x:0, y:0 };
 
@@ -13,6 +16,9 @@ var controller = function( tl, pos ) {
 	var durationContainer = null;
 	var labelsContainer = null;
 	var frameLabels = null;
+	var loopCheckBoxContainer = null;
+	var loopCheckBoxLabel = null;
+	var loopCheckBoxInput = null;
 
 	var progressOffsetX = 0;
 
@@ -56,7 +62,7 @@ var controller = function( tl, pos ) {
 			labelsContainer.appendChild( div );
 		}
 	};
-
+	
 	(function(){
 		addDomElements();
 		addListeners();
@@ -71,6 +77,7 @@ var controller = function( tl, pos ) {
 		var w = (p*100)+"%";
 		progressBar.style.width = w;
 		updateTime();
+
 	}
 
 	function onStart() {
@@ -79,8 +86,13 @@ var controller = function( tl, pos ) {
 	}
 
 	function onComplete() {
-		complete = true;
-		updatePlayIcon();
+		if( loopCheckBoxInput.checked === true ) {
+			timeline.restart();
+		} else {
+			complete = true;
+			updatePlayIcon();
+		}
+		
 	}
 
 	function playToggleOverHandler() {
@@ -175,7 +187,7 @@ var controller = function( tl, pos ) {
 		container = document.createElement( 'div' );
 		container.id = "tc-container";
 		container.style.width = "400px";
-		container.style.height = "75px";
+		container.style.height = "100px";
 		container.style.position = "absolute";
 		container.style.left = position.x + "px";
 		container.style.top = position.y + "px";
@@ -201,7 +213,7 @@ var controller = function( tl, pos ) {
 		playToggleContainer.style.height = "30px";
 		playToggleContainer.style.backgroundColor = "#b0008d";
 		playToggleContainer.style.position = "absolute";
-		playToggleContainer.style.top = "26px";
+		playToggleContainer.style.top = "42px";
 		playToggleContainer.style.left = "5px";
 
 		playToggleIcons = document.createElement( 'div' );
@@ -232,7 +244,7 @@ var controller = function( tl, pos ) {
 		progressContainer.style.height = "30px";
 		progressContainer.style.lineHeight = "30px";
 		progressContainer.style.position = "absolute";
-		progressContainer.style.top = "26px";
+		progressContainer.style.top = "42px";
 		progressContainer.style.left = "40px";
 		progressContainer.style.cursor = "pointer";
 		progressContainer.style.backgroundColor = "#000000";
@@ -254,14 +266,14 @@ var controller = function( tl, pos ) {
 		labelsContainer.style.width = "355px";
 		labelsContainer.style.height = "15px";
 		labelsContainer.style.position = "absolute";
-		labelsContainer.style.top = "57px";
+		labelsContainer.style.top = "72px";
 		labelsContainer.style.left = "40px";
 		container.appendChild( labelsContainer );
 
 		timeContainer = document.createElement( 'div' );
 		timeContainer.id = "tc-timeContainer";
 		timeContainer.style.position = "absolute";
-		timeContainer.style.top = "43px";
+		timeContainer.style.top = "52px";
 		timeContainer.style.left = "42px";
 		timeContainer.style.fontSize = "10px";
 		container.appendChild( timeContainer );
@@ -269,10 +281,34 @@ var controller = function( tl, pos ) {
 		durationContainer = document.createElement( 'div' );
 		durationContainer.id = "tc-durationContainer";
 		durationContainer.style.position = "absolute";
-		durationContainer.style.top = "43px";
+		durationContainer.style.top = "52px";
 		durationContainer.style.right = "8px";
 		durationContainer.style.fontSize = "10px";
 		container.appendChild( durationContainer );
+
+		loopCheckBoxContainer = document.createElement( 'div' );
+		loopCheckBoxContainer.id = "loopCheckBoxContainer";
+		loopCheckBoxContainer.style.position = "absolute";
+		loopCheckBoxContainer.style.right = "5px";
+		loopCheckBoxContainer.style.top = "23px";
+
+		loopCheckBoxLabel = document.createElement( 'label' );
+		loopCheckBoxLabel.style.fontSize = "10px";
+		loopCheckBoxLabel.innerHTML = "Loop";
+		loopCheckBoxContainer.appendChild( loopCheckBoxLabel );
+
+		loopCheckBoxInput = document.createElement( 'input' );
+		loopCheckBoxInput.type = "checkbox";
+		loopCheckBoxInput.checked = true;
+		loopCheckBoxContainer.appendChild( loopCheckBoxInput );
+
+		container.appendChild( loopCheckBoxContainer );
+
+
+		/*<label class="label--checkbox">
+          <input type="checkbox" class="checkbox" checked>
+            Item 1
+      </label>*/
 
 	};
 }
