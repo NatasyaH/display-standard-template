@@ -19,11 +19,17 @@ var controller = function( tl, pos ) {
 	var loopCheckBoxContainer = null;
 	var loopCheckBoxLabel = null;
 	var loopCheckBoxInput = null;
+	var fpsCheckBoxContainer = null;
+	var fpsCheckBoxLabel = null;
+	var fpsCheckBoxInput = null;
+	var fpsMeterContainer = null;
 
 	var progressOffsetX = 0;
 
 	var complete = false;
 	var paused = false;
+
+	var stats = null;
 	
 	var addListeners = function() {
 
@@ -36,6 +42,8 @@ var controller = function( tl, pos ) {
 		timeline.eventCallback( 'onStart', onStart );
 
 		progressContainer.addEventListener( 'mousedown', progressMouseDownHandler );
+
+		fpsCheckBoxInput.addEventListener( 'click', fpsCheckBoxClickHandler );
 	};
 
 	var addFrameLabels = function() {
@@ -70,7 +78,27 @@ var controller = function( tl, pos ) {
 		container.appendChild( div );
 		return div;
 	};
-	
+
+	var showFpsMeter = function() {
+		stats = new Stats();
+		stats.domElement.style.cssText = 'position:absolute;';
+		fpsMeterContainer.appendChild( stats.domElement );
+		requestAnimationFrame(function loop(){
+			if( fpsCheckBoxInput.checked === true ) {
+
+				stats.update();
+				requestAnimationFrame(loop);
+			}
+			
+		});
+	};
+
+	var hideFpsMeter = function() {
+		fpsMeterContainer.innerHTML = "";
+		stats = null;
+	};
+
+// ********** INIT **********
 	(function(){
 		addDomElements();
 		addListeners();
@@ -184,6 +212,16 @@ var controller = function( tl, pos ) {
 		if( paused === false ) timeline.resume();
 	}
 
+	function fpsCheckBoxClickHandler() {
+		console.log(fpsCheckBoxInput.checked)
+		if( fpsCheckBoxInput.checked === true ) {
+			showFpsMeter();
+		} else {
+			hideFpsMeter();
+		}
+
+	}
+
 	function seek( time, pause ){
 		timeline.seek( time );
 		if( pause ) timeline.pause();
@@ -192,8 +230,8 @@ var controller = function( tl, pos ) {
 
 	function addDomElements() {
 
-		var containerCss = 'width:400px;'+
-							'height:100px;'+
+		var containerCss =  'width:400px;'+
+							'height:200px;'+
 							'position:absolute;'+
 							'left:'+position.x+'px;'+
 							'top:'+position.y+'px;'+
@@ -285,9 +323,51 @@ var controller = function( tl, pos ) {
 		loopCheckBoxContainer.appendChild( loopCheckBoxLabel );
 
 		loopCheckBoxInput = document.createElement( 'input' );
+		loopCheckBoxInput.style.cursor = "pointer";
 		loopCheckBoxInput.type = "checkbox";
 		loopCheckBoxInput.checked = true;
 		loopCheckBoxContainer.appendChild( loopCheckBoxInput );
 
+		var fpsCheckboxCss = 'position:absolute;'+
+							 'top:100px;'+
+							 'left:5px;';
+		fpsCheckBoxContainer = createDomElement( "tc-fpsCheckBoxContainer", fpsCheckboxCss, container );
+		
+		fpsCheckBoxLabel = document.createElement( 'label' );
+		fpsCheckBoxLabel.style.fontSize = "10px";
+		fpsCheckBoxLabel.innerHTML = "FPS:";
+		fpsCheckBoxContainer.appendChild( fpsCheckBoxLabel );
+
+		fpsCheckBoxInput = document.createElement( 'input' );
+		fpsCheckBoxInput.style.cursor = "pointer";
+		fpsCheckBoxInput.type = "checkbox";
+		fpsCheckBoxInput.checked = false;
+		fpsCheckBoxContainer.appendChild( fpsCheckBoxInput );
+
+		var fpsMeterCss =   'position:absolute;'+
+							'top:100px;'+
+							'left:60px;';
+		fpsMeterContainer = createDomElement( 'tc-fpsMeterContainer', fpsMeterCss, container );
+
+		/*var stats = new Stats();
+		stats.domElement.style.cssText = 'position:absolute;';
+		fpsMeterContainer.appendChild( stats.domElement );
+		requestAnimationFrame(function loop(){
+			if( fpsCheckBoxInput.checked === true ) {
+
+				stats.update();
+
+			}
+			requestAnimationFrame(loop);
+		})*/
+
 	};
 }
+
+/*var stats = new Stats();
+stats.domElement.style.cssText = 'position:fixed;right:0;bottom:0;z-index:10000';
+document.body.appendChild(stats.domElement);
+requestAnimationFrame(function loop() {
+stats.update();
+requestAnimationFrame(loop)
+});*/
