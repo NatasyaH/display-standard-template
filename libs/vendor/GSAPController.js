@@ -741,6 +741,8 @@ var controller = function( timeline ) {
     function setTimeScale( speed ) {
         timeline.restart();
         timeline.timeScale( speed );
+        paused = false;
+        updatePlayIcon();
     }
 
 
