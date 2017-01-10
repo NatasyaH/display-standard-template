@@ -19,15 +19,21 @@ var controller = function( timeline ) {
     var progressHit = null;
     var loopContainer = null;
 
+    var fpsCheckBoxContainer = null;
+    var fpsCheckBoxInput = null;
+    var fpsMeterContainer = null;
+
     var complete = false;
     var paused = false;
     var looping = true;
+
+    var stats;
 
     var styles = document.head.appendChild(document.createElement('style'));
     styles.innerHTML = 
         '#tc-container{'+
             'width:500px;'+
-            'height:75px;'+
+            'height:125px;'+
             'background-color:#000000;'+
             'position:absolute;'+
             'font-family: Arial, Helvetica, san-serif;'+
@@ -45,7 +51,6 @@ var controller = function( timeline ) {
             'font-size:11px;'+
             'line-height:15px;'+
             'color:#CCCCCC;'+
-            
             'position:absolute;'+
             'top:7px;'+
             'left:10px;'+
@@ -57,7 +62,7 @@ var controller = function( timeline ) {
             'box-sizing: border-box;'+
             'position:absolute;'+
             'display:table;'+
-            'bottom:10px;'+
+            'top:27px;'+
             'width:100%;'+
             'height:35px;'+
             'color:#FFF;'+
@@ -212,6 +217,40 @@ var controller = function( timeline ) {
             'fill:#FFFFFF;'+
         '}'+
 
+        '#tc-fpsCheckBoxContainer{'+
+            'position:absolute;'+
+            'top:70px;'+
+            'left:10px;'+
+        '}'+
+
+        '#tc-fpsCheckBoxContainer label{'+
+            'display:block;'+
+            'position:absolute;'+
+            'top:0px;'+
+            'left:0;'+
+            'width:25px;'+
+            'height:20px;'+
+            'line-height:20px;'+
+            'font-size:10px;'+
+            'color:#FFF;'+
+            'padding-top:5px;'+
+            'padding-bottom:0;'+
+            'overflow:hidden;'+
+            'background:none;'+
+        '}'+
+
+        '#tc-fpsCheckBoxContainer input{'+
+            'position:relative;'+
+            'left:23px;'+
+            'top:6px;'+
+        '}'+
+
+        '#tc-fpsMeterContainer {'+
+            'position:absolute;'+
+            'top:70px;'+
+            'left:60px;'+
+        '}'+
+
         '.group {'+
           'display:table-cell;'+
           'position:relative;'+
@@ -350,7 +389,7 @@ var controller = function( timeline ) {
 
         loopContainer.addEventListener( 'click', loopClickHandler );
 
-        /*fpsCheckBoxInput.addEventListener( 'click', fpsCheckBoxClickHandler );*/
+        fpsCheckBoxInput.addEventListener( 'click', fpsCheckBoxClickHandler );
     };
 
     var addFrameLabels = function() {
@@ -439,6 +478,33 @@ var controller = function( timeline ) {
                 '</svg>'+
             '</div>';
 
+        // fps
+        fpsCheckBoxContainer = createDomElement( container, "tc-fpsCheckBoxContainer" );
+        var fpsLabel = document.createElement( 'label' );
+        fpsLabel.style.fontSize = "10px";
+        fpsLabel.innerHTML = "FPS:";
+        fpsCheckBoxContainer.appendChild( fpsLabel );
+        fpsCheckBoxInput = document.createElement( 'input' );
+        fpsCheckBoxInput.style.cursor = "pointer";
+        fpsCheckBoxInput.type = "checkbox";
+        fpsCheckBoxInput.checked = false;
+        fpsCheckBoxContainer.appendChild( fpsCheckBoxInput );
+
+        fpsMeterContainer = createDomElement( container, 'tc-fpsMeterContainer' );
+
+        /*stats = new Stats();
+        stats.domElement.style.cssText = 'position:absolute;';
+        fpsMeterContainer.appendChild( stats.domElement );
+        requestAnimationFrame(function loop(){
+            if( fpsCheckBoxInput.checked === true ) {
+
+                stats.update();
+
+            }
+            requestAnimationFrame(loop);
+        })
+
+        hideFpsMeter();*/
     };
 
     init();
@@ -566,6 +632,33 @@ var controller = function( timeline ) {
     function frameMarkerClickHandler( e ) {
         seek( e.target.id );
     }
+
+    function fpsCheckBoxClickHandler() {
+        if( fpsCheckBoxInput.checked === true ) {
+            showFpsMeter();
+        } else {
+            hideFpsMeter();
+        }
+    }
+
+    function showFpsMeter() {
+        stats = new Stats();
+        stats.domElement.style.cssText = 'position:absolute;';
+        fpsMeterContainer.appendChild( stats.domElement );
+        requestAnimationFrame(function loop(){
+            if( fpsCheckBoxInput.checked === true ) {
+                stats.update();
+                requestAnimationFrame(loop);
+            }
+        });
+    };
+
+    function hideFpsMeter() {
+        fpsMeterContainer.innerHTML = "";
+        stats = null;
+    };
+
+
 
     return {
         position:position,
