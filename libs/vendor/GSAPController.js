@@ -23,6 +23,9 @@ var controller = function( timeline ) {
     var fpsCheckBoxInput = null;
     var fpsMeterContainer = null;
 
+    var speedContainer = null;
+    var speeds = [ "0.5", "1", "1.5", "2" ];
+
     var complete = false;
     var paused = false;
     var looping = true;
@@ -196,9 +199,10 @@ var controller = function( timeline ) {
           'width: 40px;'+
         '}'+
 
-        '#tc-loopContainer {'+
+        '#tc-loopContainer, #tc-speedContainer {'+
           'width:40px;'+
           'cursor:pointer;'+
+          'overflow:hidden;'+
         '}'+
 
         '#tc-loopContainer:hover label.expandable, label.expandable:hover {'+
@@ -215,6 +219,22 @@ var controller = function( timeline ) {
 
         '#tc-loopContainer:hover #loopIcon path{'+
             'fill:#FFFFFF;'+
+        '}'+
+
+        '#tc-speedContainer .static {'+
+            //'padding-bottom:60px;'+
+        '}'+
+
+        '#speedMenu{'+
+            'color:#FF00CC;'+
+            'font-size:13px;'+
+            'font-weight:bold;'+
+            'list-style:none;'+
+            'line-height:21px;'+
+        '}'+
+
+        '#speedMenu li:hover{'+
+            'color:#FFFFFF;'+
         '}'+
 
         '#tc-fpsCheckBoxContainer{'+
@@ -478,6 +498,20 @@ var controller = function( timeline ) {
                 '</svg>'+
             '</div>';
 
+        //speed
+        speedContainer = createDomElement( controls, "tc-speedContainer" );
+        speedContainer.className = "group";
+        speedContainer.innerHTML = 
+            '<div class="static">'+
+                '<label class="expandable">SPEED</label>'+
+                '<ul id="speedMenu">'+
+                   // '<li>0.5x</li>'+
+                    '<li>1x</li>'+
+                    //'<li>1.5x</li>'+
+                    //'<li>2x</li>'+
+                '</ul>'+
+            '</div>';
+
         // fps
         fpsCheckBoxContainer = createDomElement( container, "tc-fpsCheckBoxContainer" );
         var fpsLabel = document.createElement( 'label' );
@@ -491,20 +525,6 @@ var controller = function( timeline ) {
         fpsCheckBoxContainer.appendChild( fpsCheckBoxInput );
 
         fpsMeterContainer = createDomElement( container, 'tc-fpsMeterContainer' );
-
-        /*stats = new Stats();
-        stats.domElement.style.cssText = 'position:absolute;';
-        fpsMeterContainer.appendChild( stats.domElement );
-        requestAnimationFrame(function loop(){
-            if( fpsCheckBoxInput.checked === true ) {
-
-                stats.update();
-
-            }
-            requestAnimationFrame(loop);
-        })
-
-        hideFpsMeter();*/
     };
 
     init();
