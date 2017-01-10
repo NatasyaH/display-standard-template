@@ -24,7 +24,8 @@ var controller = function( timeline ) {
     var fpsMeterContainer = null;
 
     var speedContainer = null;
-    var speeds = [ "0.5", "1", "1.5", "2" ];
+    var speeds = [ "0.5x", "1x", "1.5x", "2x" ];
+    var speedItems = [];
 
     var complete = false;
     var paused = false;
@@ -90,6 +91,7 @@ var controller = function( timeline ) {
         '#progressContainer {'+
           'width:auto;'+
           'position:relative;'+
+          'z-index:100;'+
         '}'+
 
         '#rangeContainer {'+
@@ -202,7 +204,8 @@ var controller = function( timeline ) {
         '#tc-loopContainer, #tc-speedContainer {'+
           'width:40px;'+
           'cursor:pointer;'+
-          'overflow:hidden;'+
+          'position:relative;'+
+          'z-index:1;'+
         '}'+
 
         '#tc-loopContainer:hover label.expandable, label.expandable:hover {'+
@@ -221,20 +224,55 @@ var controller = function( timeline ) {
             'fill:#FFFFFF;'+
         '}'+
 
-        '#tc-speedContainer .static {'+
-            //'padding-bottom:60px;'+
-        '}'+
-
         '#speedMenu{'+
             'color:#FF00CC;'+
             'font-size:13px;'+
             'font-weight:bold;'+
+            'line-height:25px;'+
+        '}'+
+
+        '#speedMenuContainer{'+
+            'display: -webkit-flex;'+
+            'display: flex;'+
+            'flex-direction: column;'+
+            '-webkit-flex-direction: column;'+
+        '}'+
+
+        '#speedMenuContainer ul{'+
             'list-style:none;'+
+        '}'+
+
+        '#speedMenuContainer ul li{'+
+            '-webkit-flex: 0 0 0;'+
+            'flex: 0 0 0;'+
+            'color:#ffffff;'+
+            'font-size:11px;'+
+            'background:#000000;'+
+            'line-height:0;'+
+            'font-size:0;'+
+        '}'+
+
+        '#speedMenu .selected, #speedMenu .selected:hover{'+
+            'color:#00CCFF;'+
+        '}'+
+
+        '#selectedSpeed{'+
+            'color:#FF00CC;'+
+            'font-size:13px;'+
+            'font-weight:bold;'+
             'line-height:21px;'+
+            '-webkit-flex:1 1;'+
+            'flex:1 1;'+
         '}'+
 
         '#speedMenu li:hover{'+
-            'color:#FFFFFF;'+
+            'color:#FF00CC;'+
+        '}'+
+
+        '#speedMenuContainer:hover #speedMenu li {'+
+          'flex: 1 1;'+
+          'font-size: 11px;'+
+          'line-height:21px;'+
         '}'+
 
         '#tc-fpsCheckBoxContainer{'+
@@ -426,11 +464,10 @@ var controller = function( timeline ) {
             div.innerHTML = 
                 '<label class="expandable">'+ name + '</label>'+
                 '<div class="marker" id="'+ name + '"></div>';
-            //div.addEventListener( 'mouseover', frameMarkerOverHandler );
-            //div.addEventListener( 'mouseout', frameMarkerOutHandler );
             div.addEventListener( 'click', frameMarkerClickHandler );
             var label = document.createElement('label');
             label.className = "expandable";
+
             labelsContainer.appendChild( div );
         }
     };
@@ -503,14 +540,22 @@ var controller = function( timeline ) {
         speedContainer.className = "group";
         speedContainer.innerHTML = 
             '<div class="static">'+
-                '<label class="expandable">SPEED</label>'+
-                '<ul id="speedMenu">'+
-                   // '<li>0.5x</li>'+
-                    '<li>1x</li>'+
-                    //'<li>1.5x</li>'+
-                    //'<li>2x</li>'+
-                '</ul>'+
+                '<label></label>'+
+                '<div id="speedMenuContainer">'+
+                    '<div id="selectedSpeed">1x</div>'+
+                    '<ul id="speedMenu"></ul>'+
+                '</div>'+
             '</div>';
+
+        for( var i=0; i<speeds.length; i++ ){
+            var li = document.createElement( 'li' );
+            li.value = i;
+            if ( li.value === 2 ) li.className = "selected";
+            li.innerHTML = speeds[i];
+            li.addEventListener( 'click', speedMenuClickHandler );
+            speedItems.push( li );
+            document.getElementById('speedMenu').appendChild(li);
+        }
 
         // fps
         fpsCheckBoxContainer = createDomElement( container, "tc-fpsCheckBoxContainer" );
@@ -552,7 +597,6 @@ var controller = function( timeline ) {
             complete = true;
             updatePlayIcon();
         }
-        
     }
 
     function playButtonClickHandler() {
@@ -605,7 +649,6 @@ var controller = function( timeline ) {
             if( pause ) timeline.pause();
             update();
         }
-        
     }
 
     function startSeek( e ){
@@ -678,6 +721,27 @@ var controller = function( timeline ) {
         stats = null;
     };
 
+    function speedMenuClickHandler( e ) {
+        var clickeditem = e.target;
+        var spd = e.target.innerHTML;
+        var re = /x$/;
+        spd = spd.replace(re, "");
+        spd = spd * 1;
+        setTimeScale( spd );
+
+        speedItems.forEach(function( item, index ){
+            item.className = "";
+            if( index === clickeditem.value) {
+                item.className = "selected";
+                document.getElementById( "selectedSpeed" ).innerHTML = item.innerHTML;
+            }
+        })
+    }
+
+    function setTimeScale( speed ) {
+        timeline.restart();
+        timeline.timeScale( speed );
+    }
 
 
     return {
