@@ -3,7 +3,6 @@
   var Animation = function () {
     // do all your animation in this function. Including any calls to get DOM elements.
     var render = function () {
-      
 
       var onComplete = function () {
         console.log('animation complete');
@@ -37,7 +36,9 @@
       tl.staggerFromTo( ".box", 1, { immediateRender:false, scaleX:0.35 }, { smoothify:true, scaleX:0, ease:Power4.easeInOut }, -0.1, "scaleOutBoxes" );
 
 
-      controller( tl, { x:0, y:280 } );
+      var c = new controller( tl );
+      c.position.x = 5;
+      c.position.y = 265;
 
 
       //customize this function so that when called it kills all animation timelines, etc.
