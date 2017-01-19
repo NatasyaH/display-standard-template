@@ -12,6 +12,20 @@
       var onStart = function () {
         
       };
+
+      var container = document.getElementById( 'animation-container' );
+      var drawBoxes = function() {
+        var colors = [ "#000000", "#006680", "#00CCFF", "#bf72e5", "#FF00CC" ];
+        var div;
+        colors.forEach(function( item, index ){
+          div = document.createElement( 'div' );
+          div.className = "box";
+          div.style.backgroundColor = item;
+          container.appendChild( div );
+        })
+      };
+
+      drawBoxes();
       
       TweenMax.set( ".box", { transformOrigin:"50% 50%" } );
       TweenMax.to( '#adRoot', 0.15, { opacity: 1 });
@@ -23,22 +37,22 @@
         //paused: true
       });
 
-      tl.addLabel( "start", 0 );
+      tl.addLabel( "animateIn", 0 );
 
-      tl.addLabel( "scaleDownBoxes", 0.25 );
 
-      tl.staggerFromTo( ".box", 1.2, { scale:1 }, { smoothify:true, scale:0.35, ease:Elastic.easeOut.config (0.8, 0.5) }, -0.05 );
+      tl.staggerFromTo( ".box", 1.3, { scale:1 }, { smoothify:true, cycle:{ 
+                                                                      scale:function(i){
+                                                                        return 0.35 + (i * 0.02);
+                                                                      }}, ease:Elastic.easeOut.config (0.8, 0.4) }, -0.1, "animateIn" );
 
-      tl.addLabel( "rotateBoxes" )
-      tl.staggerFromTo( ".box", 1, { rotation:0 }, { smoothify:true, rotation:180, ease:Power2.easeOut }, -0.07, "rotateBoxes" );
-
-      tl.addLabel( "scaleOutBoxes" );
-      tl.staggerFromTo( ".box", 1, { immediateRender:false, scaleX:0.35 }, { smoothify:true, scaleX:0, ease:Power4.easeInOut }, -0.1, "scaleOutBoxes" );
+      tl.addLabel( "animateOut" );
+      tl.staggerTo( ".box", 0.8, { smoothify:true, scale:0, ease:Power4.easeInOut }, -0.1, "animateOut" );
 
 
       var c = new controller( tl );
       c.position.x = 5;
       c.position.y = 265;
+      //c.size.width = 350;
 
 
       //customize this function so that when called it kills all animation timelines, etc.
