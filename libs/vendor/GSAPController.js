@@ -47,7 +47,7 @@ var controller = function( timeline ) {
             'height:100%;'+
             'font-family:Arial,Helvetica,san-serif;'+
             'font-size:0;'+
-            'background-color:#333333;'+
+            'background-color:#404040;'+
             'position:relative;'+
         '}'+
         '#tc-info{'+
@@ -123,7 +123,6 @@ var controller = function( timeline ) {
             'top: 1px;'+
             'height:10px;'+
             'cursor:pointer;'+
-            
         '}'+
 
         '.frameMarker .marker{'+
@@ -147,15 +146,19 @@ var controller = function( timeline ) {
             'position:relative;'+
             'height:0px;'+
             'display:none;'+
+
+            
         '}'+
 
         '.frameMarker:hover label.expandable, label.expandable:hover {'+
             'display:block;'+
-            '-webkit-border-radius: 5px 5px 0px 0px;'+
-            'border-radius: 5px 5px 0px 0px;'+
-            'margin-top:-20px;'+
+            '-webkit-border-radius: 2px 2px 0px 0px;'+
+            'border-radius: 2px 2px 0px 0px;'+
+            'margin-top:-16px;'+
             'padding:5px;'+
-            'height:10px;'+
+            'height:auto;'+
+            'background-color: rgba(0, 0, 0, 0.5);'+
+            'line-height:10px;'+
         '}'+
 
         '#rangeBg {'+
@@ -529,7 +532,7 @@ var controller = function( timeline ) {
         loopContainer.className = "group";
         loopContainer.innerHTML = 
             '<div class="static">'+
-                '<label class="expandable">LOOP</label>'+
+                '<label></label>'+
                 '<svg version="1.1" id="loopIcon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="25px" height="17px" viewBox="0 0 25 17" enable-background="new 0 0 25 17" xml:space="preserve">'+
                     '<path fill="#FF00CC" d="M19.5,4.7h-3.8v2.8h3v4.2H6.3V7.5h4.2v2.2l4-3.6l-4-3.6v2.2h-5c-1.1,0-2,0.9-2,2v5.8c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V6.7C21.5,5.6,20.6,4.7,19.5,4.7z"/>'+
                 '</svg>'+
