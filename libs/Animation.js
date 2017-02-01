@@ -34,7 +34,6 @@
       tl = new TimelineMax({
         onComplete: onComplete,
         onStart: onStart,
-        //paused: true
       });
 
       tl.addLabel( "animateIn", 0 );
@@ -45,7 +44,7 @@
                                                                         return 0.35 + (i * 0.02);
                                                                       }}, ease:Elastic.easeOut.config (0.8, 0.4) }, -0.08, "animateIn" );
 
-      tl.addLabel( "rotate" );
+      tl.addLabel( "rotate", 1.3 );
       tl.staggerTo( ".box", 0.8, { smoothify:true, rotation:180, ease:Power4.easeIn }, -0.08, "rotate" );
       tl.addLabel( "animateOut" );
       tl.staggerTo( ".box", 0.8, { smoothify:true, scale:0, ease:Power4.easeOut }, -0.1, "animateOut" );
@@ -55,7 +54,6 @@
       c.position.x = 5;
       c.position.y = 265;
 
-      //customize this function so that when called it kills all animation timelines, etc.
       return function destroy() {
         console.log('Kill Animations');
         tl.kill();

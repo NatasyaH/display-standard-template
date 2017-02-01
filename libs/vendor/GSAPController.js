@@ -251,7 +251,7 @@ var controller = function( timeline ) {
             'flex: 0 0 0;'+
             'color:#ffffff;'+
             'font-size:11px;'+
-            'background:#000000;'+
+            'background-color:rgba(0,0,0,0.6);'+
             'line-height:0;'+
             'font-size:0;'+
         '}'+
@@ -276,7 +276,7 @@ var controller = function( timeline ) {
         '#speedMenuContainer:hover #speedMenu li {'+
           'flex: 1 1;'+
           'font-size: 11px;'+
-          'line-height:21px;'+
+          'line-height:20px;'+
         '}'+
 
         '#tc-fpsinfo{'+
@@ -570,7 +570,7 @@ var controller = function( timeline ) {
       for( var i=0; i<speeds.length; i++ ){
         var li = document.createElement( 'li' );
         li.value = i;
-        if ( li.value === 2 ) li.className = "selected";
+        if ( li.value === 1 ) li.className = "selected";
         li.innerHTML = speeds[i];
         li.addEventListener( 'click', speedMenuClickHandler );
         speedItems.push( li );
