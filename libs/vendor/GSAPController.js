@@ -98,16 +98,14 @@ var controller = function( timeline ) {
         '}'+
 
         '#rangeContainer {'+
-          'padding: 0 7px 0 5px;'+
+          'padding: 0 7px 0 7px;'+
         '}'+
 
         '#progressHit{'+
             'display:block;'+
             'height:12px;'+
-            'position:absolute;'+
-            'top:6px;'+
-            'left:5px;'+
-            'width:96%;'+
+            'position:relative;'+
+            'top:0px;'+
             'cursor:pointer;'+
         '}'+
 
@@ -115,8 +113,8 @@ var controller = function( timeline ) {
             'display:block;'+
             'height:12px;'+
             'position:absolute;'+
-            'top:6px;'+
-            'left:6px;'+
+            'top:12px;'+
+            'left:8px;'+
             'width:95%;'+
             'pointer-events:none;'+
         '}'+
@@ -166,7 +164,7 @@ var controller = function( timeline ) {
           'display:block;'+
           'height:10px;'+
           'position:relative;'+
-          'top:6px;'+
+          'top:12px;'+
           'padding:0;'+
           'background-color: rgba(162, 49, 139, 0.5);'+
           'border: 1px solid rgba(210, 58, 180, 0.5);'+
@@ -178,7 +176,7 @@ var controller = function( timeline ) {
           'background-color:#de1eb8;'+
           'border:1px solid #FF00CC;'+
           'position:absolute;'+
-          'top:6px;'+
+          'top:12px;'+
           'cursor:pointer;'+
           '-webkit-box-shadow: 0px 0px 3px 1px rgba(255, 255, 150, 0.2);'+
           'box-shadow: 0px 0px 3px 1px rgba(255, 255, 150, 0.2);'+
@@ -189,10 +187,9 @@ var controller = function( timeline ) {
           'width:4px;'+
           'background-color:#FF00CC;'+
           'position:absolute;'+
-          'top:4px;'+
-          'margin-left:2px;'+
+          'top:10px;'+
+          'margin-left:8px;'+
           'border:1px solid #000;'+
-          'cursor:pointer;'+
           'opacity:0;'+
           'cursor:pointer;'+
         '}'+
@@ -212,20 +209,8 @@ var controller = function( timeline ) {
           'z-index:1;'+
         '}'+
 
-        '#tc-loopContainer:hover label.expandable, label.expandable:hover {'+
-            '-webkit-border-radius: 5px 5px 0px 0px;'+
-            'border-radius: 5px 5px 0px 0px;'+
-            'margin-top:-20px;'+
-            'padding-bottom:5px;'+
-            'height:15px;'+
-        '}'+
-
         '#loopIcon{'+
-            'margin-top:2px;'+
-        '}'+
-
-        '#tc-loopContainer:hover #loopIcon path{'+
-            'fill:#FFFFFF;'+
+            'margin-top:8px;'+
         '}'+
 
         '#speedMenu{'+
@@ -244,6 +229,7 @@ var controller = function( timeline ) {
 
         '#speedMenuContainer ul{'+
             'list-style:none;'+
+            'margin-top:4px;'+
         '}'+
 
         '#speedMenuContainer ul li{'+
@@ -251,13 +237,15 @@ var controller = function( timeline ) {
             'flex: 0 0 0;'+
             'color:#ffffff;'+
             'font-size:11px;'+
-            'background-color:rgba(0,0,0,0.6);'+
+            'background-color:rgba(0,0,0,1);'+
             'line-height:0;'+
             'font-size:0;'+
         '}'+
 
-        '#speedMenu .selected, #speedMenu .selected:hover{'+
-            'color:#00CCFF;'+
+        '#speedMenu li:last-child {'+
+          '-webkit-border-radius: 0 0 5px 0;'+
+          'border-radius: 0 0 5px 0;'+
+          
         '}'+
 
         '#selectedSpeed{'+
@@ -267,10 +255,23 @@ var controller = function( timeline ) {
             'line-height:21px;'+
             '-webkit-flex:1 1;'+
             'flex:1 1;'+
+            'margin-top:6px;'+
+        '}'+
+
+        '#tc-speedContainer:hover .static {'+
+          'background-color:rgba(0,0,0,1);'+
+        '}'+
+
+        '#tc-speedContainer:hover .static #speedMenuContainer #speedMenu li:last-child {'+
+          'padding-bottom:6px;'+
+        '}'+
+
+        '#speedMenu .selected, #speedMenu .selected:hover{'+
+            'color:#FF00CC;'+
         '}'+
 
         '#speedMenu li:hover{'+
-            'color:#FF00CC;'+
+            'color:#00CCFF;'+
         '}'+
 
         '#speedMenuContainer:hover #speedMenu li {'+
@@ -337,18 +338,8 @@ var controller = function( timeline ) {
           'position:relative;'+
           'vertical-align:top;'+
         '}'+
-        '.group:after {'+
-          'content:" ";'+
-          'display:block;'+
-          'height:5px;'+
-          'background-color:rgba(0, 0,0,0.6);'+
-          'margin-top:1px;'+
-          'margin-right:1px;'+
-        '}'+
-        '.group:first-child:after {'+
-          'display:none;'+
-        '}'+
-        '.group:last-child:after {'+
+
+        '.group:last-child > * {'+
           '-webkit-border-radius: 0 0 5px 0;'+
           'border-radius: 0 0 5px 0;'+
         '}'+
@@ -366,19 +357,12 @@ var controller = function( timeline ) {
           'color:#FF00CC;'+
           'margin:0 1px 0 0;'+
           'height:35px;'+
-          'line-height:35px;'+
+          'line-height:38px;'+
           'position:relative;'+
           'background-color: rgba(0,0,0,0.6);'+
           'text-align:center;'+
           'padding:0;'+
           'cursor:pointer;'+
-        '}'+
-        'a:hover {'+
-          'color:#000;'+
-          'background-color:#FF00CC;'+
-        '}'+
-        'a:hover .tc-play-icon, a:hover .tc-pause-icon {'+
-          'fill:#000;'+
         '}'+
         '.tc-pause-icon{'+
             'opacity:0;'+
@@ -403,9 +387,8 @@ var controller = function( timeline ) {
 
         '.static {'+
           'margin-bottom:0;'+
-          'margin-top:6px;'+
-          'height:23px;'+
-          'line-height:23px;'+
+          'height:35px;'+
+          'line-height:35px;'+
           'background-color:rgba(0,0,0,0.6);'+
           'text-align:center;'+
           'position:relative;'+
@@ -457,6 +440,8 @@ var controller = function( timeline ) {
 
     var addListeners = function() {
       playButton.addEventListener( 'click', playButtonClickHandler );
+      playButton.addEventListener( 'mouseover', playButtonOverHandler );
+      playButton.addEventListener( 'mouseout', playButtonOutHandler );
 
       timeline.eventCallback( 'onUpdate', update );
       timeline.eventCallback( 'onComplete', onComplete );
@@ -465,6 +450,8 @@ var controller = function( timeline ) {
       progressHit.addEventListener( 'mousedown', startSeek );
 
       loopContainer.addEventListener( 'click', loopClickHandler );
+      loopContainer.addEventListener( 'mouseover', loopOverHandler );
+      loopContainer.addEventListener( 'mouseout', loopOutHandler );
 
       fpsCheckBoxContainer.addEventListener( 'mouseover', fpsCheckBoxOverHandler );
       fpsCheckBoxContainer.addEventListener( 'mouseout', fpsCheckBoxOutHandler );
@@ -519,7 +506,6 @@ var controller = function( timeline ) {
       time.className = "group";
       time.innerHTML = 
         '<div class="static">'+
-          '<label></label>'+
           '<span id="currentTime">00:00</span>'+
           '<span id="totalTime">00:00</span>'+
         '</div>';
@@ -531,7 +517,6 @@ var controller = function( timeline ) {
       progressContainer.className = "group";
       progressContainer.innerHTML = 
         '<div class="static" id="rangeContainer">'+
-          '<label></label>'+
           '<div id="rangeBg"></div>'+
           '<div id="seekFill"></div>'+
           '<div id="seekDrag"></div>'+
@@ -549,7 +534,6 @@ var controller = function( timeline ) {
       loopContainer.className = "group";
       loopContainer.innerHTML = 
         '<div class="static">'+
-          '<label></label>'+
           '<svg version="1.1" id="loopIcon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="25px" height="17px" viewBox="0 0 25 17" enable-background="new 0 0 25 17" xml:space="preserve">'+
             '<path fill="#FF00CC" d="M19.5,4.7h-3.8v2.8h3v4.2H6.3V7.5h4.2v2.2l4-3.6l-4-3.6v2.2h-5c-1.1,0-2,0.9-2,2v5.8c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V6.7C21.5,5.6,20.6,4.7,19.5,4.7z"/>'+
           '</svg>'+
@@ -560,7 +544,6 @@ var controller = function( timeline ) {
       speedContainer.className = "group";
       speedContainer.innerHTML = 
         '<div class="static">'+
-          '<label></label>'+
           '<div id="speedMenuContainer">'+
             '<div id="selectedSpeed">1x</div>'+
             '<ul id="speedMenu"></ul>'+
@@ -596,8 +579,9 @@ var controller = function( timeline ) {
     function update() {
       var t = timeline.time();
       var d = timeline.duration();
-      seekFill.style.width = Math.round((t/d)*(rangeBg.offsetWidth-2))+"px";
-      seekDrag.style.left = Math.round((t/d)*(rangeBg.offsetWidth-2))+"px";
+      var p = Math.round((t/d)*(rangeBg.offsetWidth));
+      seekFill.style.width = p-2 + "px";
+      seekDrag.style.left = p-2 + "px";
       updateTime();
     }
 
@@ -627,6 +611,16 @@ var controller = function( timeline ) {
         paused = true;
       }
       updatePlayIcon();
+    }
+
+    function playButtonOverHandler() {
+      if( paused === true || complete === true ) TweenMax.to( ".tc-play-icon", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
+      else TweenMax.to( ".tc-pause-icon", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
+    }
+
+    function playButtonOutHandler() {
+      if( paused === true || complete === true ) TweenMax.to( ".tc-play-icon", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
+      else TweenMax.to( ".tc-pause-icon", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
     }
 
     function updatePlayIcon() {
@@ -695,6 +689,16 @@ var controller = function( timeline ) {
         TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
         looping = true;
       }
+      TweenMax.to( "#tc-loopContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,0.6)", ease:Power2.easeOut } );
+    }
+
+    function loopOverHandler() {
+      TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
+    }
+
+    function loopOutHandler() {
+      if( looping === true ) TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
+      else TweenMax.to( "#loopIcon > path", 0.2, { fill:"#666666", ease:Power2.easeOut } );
     }
 
     function frameMarkerOverHandler( e ){
