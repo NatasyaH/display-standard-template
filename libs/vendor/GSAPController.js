@@ -27,68 +27,70 @@ var controller = function( timeline ) {
     var fpsChecked = false;
 
     var speedContainer = null;
+    var speedMenu = null;
+    var speedMenuContainer = null;
     var speeds = [ "0.5x", "1x", "1.5x", "2x" ];
     var speedItems = [];
 
     var complete = false;
     var paused = false;
-    var looping = true;
+    var looping = false;
 
     var stats;
 
     var styles = document.head.appendChild(document.createElement('style'));
     styles.innerHTML = 
         '#tc-container{'+
-            'width:500px;'+
-            'height:100px;'+
-            'background-color:#000000;'+
-            'position:absolute;'+
-            'font-family: Arial, Helvetica, san-serif;'+
+          'width:500px;'+
+          'height:100px;'+
+          'background-color:#000000;'+
+          'position:absolute;'+
+          'font-family: Arial, Helvetica, san-serif;'+
         '}'+
         '#tc-controller{'+
-            'width:100%;'+
-            'height:100%;'+
-            'font-family:Arial,Helvetica,san-serif;'+
-            'font-size:0;'+
-            'background-color:#404040;'+
-            'position:relative;'+
+          'width:100%;'+
+          'height:100%;'+
+          'font-family:Arial,Helvetica,san-serif;'+
+          'font-size:0;'+
+          'background-color:#404040;'+
+          'position:relative;'+
         '}'+
         '#tc-info{'+
-            'display:inline;'+
-            'font-size:11px;'+
-            'line-height:15px;'+
-            'color:#CCCCCC;'+
-            'position:absolute;'+
-            'top:7px;'+
-            'left:10px;'+
+          'display:inline;'+
+          'font-size:11px;'+
+          'line-height:15px;'+
+          'color:#CCCCCC;'+
+          'position:absolute;'+
+          'top:7px;'+
+          'left:10px;'+
         '}'+
         '#tc-controls{'+
-            'padding: 0 10px;'+
-            '-moz-box-sizing: border-box;'+
-            '-webkit-box-sizing: border-box;'+
-            'box-sizing: border-box;'+
-            'position:absolute;'+
-            'display:table;'+
-            'top:27px;'+
-            'width:100%;'+
-            'height:35px;'+
-            'color:#FFF;'+
-            'border-spacing:0;'+
+          'padding: 0 10px;'+
+          '-moz-box-sizing: border-box;'+
+          '-webkit-box-sizing: border-box;'+
+          'box-sizing: border-box;'+
+          'position:absolute;'+
+          'display:table;'+
+          'top:27px;'+
+          'width:100%;'+
+          'height:35px;'+
+          'color:#FFF;'+
+          'border-spacing:0;'+
         '}'+
         '#tc-playButton{'+
-            'width:40px;'+
+          'width:40px;'+
         '}'+
         '#tc-time{'+
-            'font-size:10px;'+
-            'width:70px;'+
+          'font-size:10px;'+
+          'width:70px;'+
         '}'+
         '#currentTime{'+
-            'border-right:2px solid #7D7575;'+
-            'padding-right:4px;'+
+          'border-right:2px solid #7D7575;'+
+          'padding-right:4px;'+
         '}'+
         '#totalTime{'+
-            'color:b90094;'+
-            'padding-left:4px;'+
+          'color:b90094;'+
+          'padding-left:4px;'+
         '}'+
 
         '#progressContainer {'+
@@ -102,62 +104,62 @@ var controller = function( timeline ) {
         '}'+
 
         '#progressHit{'+
-            'display:block;'+
-            'height:12px;'+
-            'position:relative;'+
-            'top:0px;'+
-            'cursor:pointer;'+
+          'display:block;'+
+          'height:12px;'+
+          'position:relative;'+
+          'top:0px;'+
+          'cursor:pointer;'+
         '}'+
 
         '#labelsContainer{'+
-            'display:block;'+
-            'height:12px;'+
-            'position:absolute;'+
-            'top:12px;'+
-            'left:8px;'+
-            'width:95%;'+
-            'pointer-events:none;'+
+          'display:block;'+
+          'height:12px;'+
+          'position:absolute;'+
+          'top:12px;'+
+          'left:8px;'+
+          'width:95%;'+
+          'pointer-events:none;'+
         '}'+
 
         '.frameMarker{'+
-            'position:absolute;'+
-            'top: 1px;'+
-            'height:10px;'+
-            'cursor:pointer;'+
+          'position:absolute;'+
+          'top: 1px;'+
+          'height:10px;'+
+          'cursor:pointer;'+
         '}'+
 
         '.frameMarker .marker{'+
-            'position:absolute;'+
-            'top:0;'+
-            'width:5px;'+
-            'height:10px;'+
-            'border-left: 2px solid #00CCFF;'+
-            'margin-left: -1px;'+
-            'padding-left:1px;'+
-            'color: #00CCFF;'+
-            'pointer-events:all;'+
+          'position:absolute;'+
+          'top:0;'+
+          'width:5px;'+
+          'height:10px;'+
+          'border-left: 2px solid #00CCFF;'+
+          'margin-left: -1px;'+
+          'padding-left:1px;'+
+          'color: #00CCFF;'+
+          'pointer-events:all;'+
         '}'+
 
         '.frameMarker:hover .marker{'+
-            'border-left: 2px solid #FFFFFF;'+
+          'border-left: 2px solid #FFFFFF;'+
         '}'+
 
         '.frameMarker label {'+
-            'pointer-events:all;'+
-            'position:relative;'+
-            'height:0px;'+
-            'display:none;'+
+          'pointer-events:all;'+
+          'position:relative;'+
+          'height:0px;'+
+          'display:none;'+
         '}'+
 
         '.frameMarker:hover label.expandable, label.expandable:hover {'+
-            'display:block;'+
-            '-webkit-border-radius: 2px 2px 0px 0px;'+
-            'border-radius: 2px 2px 0px 0px;'+
-            'margin-top:-16px;'+
-            'padding:5px;'+
-            'height:auto;'+
-            'background-color: rgba(0, 0, 0, 0.5);'+
-            'line-height:10px;'+
+          'display:block;'+
+          '-webkit-border-radius: 2px 2px 0px 0px;'+
+          'border-radius: 2px 2px 0px 0px;'+
+          'margin-top:-16px;'+
+          'padding:5px;'+
+          'height:auto;'+
+          'background-color: rgba(0, 0, 0, 0.5);'+
+          'line-height:10px;'+
         '}'+
 
         '#rangeBg {'+
@@ -210,74 +212,54 @@ var controller = function( timeline ) {
         '}'+
 
         '#loopIcon{'+
-            'margin-top:8px;'+
+          'margin-top:8px;'+
         '}'+
 
         '#speedMenu{'+
-            'color:#FF00CC;'+
-            'font-size:13px;'+
-            'font-weight:bold;'+
-            'line-height:25px;'+
-        '}'+
-
-        '#speedMenuContainer{'+
-            'display: -webkit-flex;'+
-            'display: flex;'+
-            'flex-direction: column;'+
-            '-webkit-flex-direction: column;'+
-        '}'+
-
-        '#speedMenuContainer ul{'+
-            'list-style:none;'+
-            'margin-top:4px;'+
-        '}'+
-
-        '#speedMenuContainer ul li{'+
-            '-webkit-flex: 0 0 0;'+
-            'flex: 0 0 0;'+
-            'color:#ffffff;'+
-            'font-size:11px;'+
-            'background-color:rgba(0,0,0,1);'+
-            'line-height:0;'+
-            'font-size:0;'+
-        '}'+
-
-        '#speedMenu li:last-child {'+
-          '-webkit-border-radius: 0 0 5px 0;'+
-          'border-radius: 0 0 5px 0;'+
-          
+          'display:none;'+
+          'height:0;'+
+          'position:absolute;'+
+          'left:0;'+
+          'background-color:#000000;'+
+          'overflow:hidden;'+
+          'width:40px;'+
+          '-webkit-border-radius: 0px 5px 5px 0px;'+
+          'border-radius: 0px 5px 5px 0px;'+
         '}'+
 
         '#selectedSpeed{'+
-            'color:#FF00CC;'+
-            'font-size:13px;'+
-            'font-weight:bold;'+
-            'line-height:21px;'+
-            '-webkit-flex:1 1;'+
-            'flex:1 1;'+
-            'margin-top:6px;'+
+          'color:#FF00CC;'+
+          'font-size:13px;'+
+          'font-weight:bold;'+
+          'line-height:35px;'+
+          'width:40px;'+
+          'pointer-events:none;'+
         '}'+
 
-        '#tc-speedContainer:hover .static {'+
-          'background-color:rgba(0,0,0,1);'+
+        '#speedMenuContainer {'+
+          'position:relative;'+
+          'display:inline-block;'+
         '}'+
 
-        '#tc-speedContainer:hover .static #speedMenuContainer #speedMenu li:last-child {'+
-          'padding-bottom:6px;'+
+        '#speedMenuContainer ul{'+
+          'list-style:none;'+
+          'font-weight:bold;'+
+          'margin-top:-6px;'+
         '}'+
 
+        '#speedMenuContainer ul li{'+
+          'color:#ffffff;'+
+          'font-size:11px;'+
+          'line-height:23px;'+
+          'display:block;'+
+        '}'+
+        
         '#speedMenu .selected, #speedMenu .selected:hover{'+
-            'color:#FF00CC;'+
+          'color:#FF00CC;'+
         '}'+
 
         '#speedMenu li:hover{'+
-            'color:#00CCFF;'+
-        '}'+
-
-        '#speedMenuContainer:hover #speedMenu li {'+
-          'flex: 1 1;'+
-          'font-size: 11px;'+
-          'line-height:20px;'+
+          'color:#00CCFF;'+
         '}'+
 
         '#tc-fpsinfo{'+
@@ -291,24 +273,24 @@ var controller = function( timeline ) {
         '}'+
 
         '#tc-fpsCheckBoxContainer{'+
-            'position:absolute;'+
-            'top:72px;'+
-            'left:72px;'+
-            'cursor: pointer;'+
-            'font-size:10px;'+
-            'width:16px;'+
-            'height:16px;'+
-            '-moz-border-radius: 3px;'+
-            '-webkit-border-radius: 3px;'+
-            'border-radius: 3px;'+
-            'padding:0;'+
-            'background-color:rgba(0,0,0,0.6);'+
-            'cursor: pointer;'+
-            'overflow: hidden;'+
-            'text-align: center;'+
-            '-moz-box-sizing: border-box;'+
-            '-webkit-box-sizing: border-box;'+
-            'box-sizing: border-box;'+
+          'position:absolute;'+
+          'top:72px;'+
+          'left:72px;'+
+          'cursor: pointer;'+
+          'font-size:10px;'+
+          'width:16px;'+
+          'height:16px;'+
+          '-moz-border-radius: 3px;'+
+          '-webkit-border-radius: 3px;'+
+          'border-radius: 3px;'+
+          'padding:0;'+
+          'background-color:rgba(0,0,0,0.6);'+
+          'cursor: pointer;'+
+          'overflow: hidden;'+
+          'text-align: center;'+
+          '-moz-box-sizing: border-box;'+
+          '-webkit-box-sizing: border-box;'+
+          'box-sizing: border-box;'+
         '}'+
 
         '#fpsCheck {'+
@@ -456,6 +438,8 @@ var controller = function( timeline ) {
       fpsCheckBoxContainer.addEventListener( 'mouseover', fpsCheckBoxOverHandler );
       fpsCheckBoxContainer.addEventListener( 'mouseout', fpsCheckBoxOutHandler );
       fpsCheckBoxContainer.addEventListener( 'click', fpsCheckBoxClickHandler );
+
+      speedMenuContainer.addEventListener( "mouseover", speedContainerOverHandler );
     };
 
     var addFrameLabels = function() {
@@ -550,6 +534,9 @@ var controller = function( timeline ) {
           '</div>'+
         '</div>';
 
+      speedMenu = document.getElementById( "speedMenu" );
+      speedMenuContainer = document.getElementById( "speedMenuContainer" );
+
       for( var i=0; i<speeds.length; i++ ){
         var li = document.createElement( 'li' );
         li.value = i;
@@ -616,11 +603,13 @@ var controller = function( timeline ) {
     function playButtonOverHandler() {
       if( paused === true || complete === true ) TweenMax.to( ".tc-play-icon", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
       else TweenMax.to( ".tc-pause-icon", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
+      TweenMax.to( "#tc-playButton > a", 0.2, { backgroundColor:"rgba(0,0,0,1)", ease:Power2.easeOut } );
     }
 
     function playButtonOutHandler() {
       if( paused === true || complete === true ) TweenMax.to( ".tc-play-icon", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
       else TweenMax.to( ".tc-pause-icon", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
+      TweenMax.to( "#tc-playButton > a", 0.2, { backgroundColor:"rgba(0,0,0,0.6)", ease:Power2.easeOut } );
     }
 
     function updatePlayIcon() {
@@ -689,16 +678,54 @@ var controller = function( timeline ) {
         TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
         looping = true;
       }
-      TweenMax.to( "#tc-loopContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,0.6)", ease:Power2.easeOut } );
     }
 
     function loopOverHandler() {
+      TweenMax.to( "#tc-loopContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,1)", ease:Power2.easeOut } );
       TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
     }
 
     function loopOutHandler() {
       if( looping === true ) TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
       else TweenMax.to( "#loopIcon > path", 0.2, { fill:"#666666", ease:Power2.easeOut } );
+      TweenMax.to( "#tc-loopContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,0.6)", ease:Power2.easeOut } );
+    }
+
+    function speedMenuClickHandler( e ) {
+      var clickeditem = e.target;
+      var spd = e.target.innerHTML;
+      var re = /x$/;
+      spd = spd.replace(re, "");
+      spd = spd * 1;
+      setTimeScale( spd );
+
+      speedItems.forEach(function( item, index ){
+        item.className = "";
+        if( index === clickeditem.value) {
+          item.className = "selected";
+          document.getElementById( "selectedSpeed" ).innerHTML = item.innerHTML;
+        }
+      })
+    }
+
+    function speedContainerOverHandler() {
+      speedMenuContainer.addEventListener( "mouseout", speedMenuOutHandler );
+      showSpeedMenu();
+    }
+
+    function speedMenuOutHandler() {
+      hideSpeedMenu();
+    }
+
+    function showSpeedMenu() {
+      TweenMax.set("#speedMenu", { display:"block" })
+      TweenMax.to( "#tc-speedContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,1)", ease:Power2.easeInOut } );
+      TweenMax.to( "#speedMenu", 0.2, { height:"95px", ease:Power2.easeOut } );
+    }
+
+    function hideSpeedMenu() {
+      TweenMax.to( "#tc-speedContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,0.6)", ease:Power2.easeInOut } );
+      TweenMax.to( "#speedMenu", 0.2, { height:"0px", ease:Power2.easeOut, onComplete:function(){ TweenMax.set("#speedMenu", {display:"none"}) } } );
     }
 
     function frameMarkerOverHandler( e ){
@@ -762,23 +789,6 @@ var controller = function( timeline ) {
       TweenMax.to( "#tc-container", 0.35, { height:"100px", ease:Power2.easeOut } );
       stats = null;
     };
-
-    function speedMenuClickHandler( e ) {
-      var clickeditem = e.target;
-      var spd = e.target.innerHTML;
-      var re = /x$/;
-      spd = spd.replace(re, "");
-      spd = spd * 1;
-      setTimeScale( spd );
-
-      speedItems.forEach(function( item, index ){
-        item.className = "";
-        if( index === clickeditem.value) {
-          item.className = "selected";
-          document.getElementById( "selectedSpeed" ).innerHTML = item.innerHTML;
-        }
-      })
-    }
 
     function setTimeScale( speed ) {
       timeline.restart();
