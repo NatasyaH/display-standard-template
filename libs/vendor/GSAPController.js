@@ -34,10 +34,11 @@ var controller = function( timeline ) {
 
     var complete = false;
     var paused = false;
-    var looping = false;
+    var looping = true;
 
     var stats;
 
+    // All the CSS is created here
     var styles = document.head.appendChild(document.createElement('style'));
     styles.innerHTML = 
         '#tc-container{'+
@@ -395,6 +396,399 @@ var controller = function( timeline ) {
           'margin-right:0;'+
         '}';
 
+    var createDomElement = function( container, id ) {
+      var div = document.createElement( 'div' );
+      if( id ) div.id = id;
+      container.appendChild( div );
+      return div;
+    };
+
+    var addListeners = function() {
+      // PLAY
+      playButton.addEventListener( 'click', playButtonClickHandler );
+      playButton.addEventListener( 'mouseover', playButtonOverHandler );
+      playButton.addEventListener( 'mouseout', playButtonOutHandler );
+
+      // TIMELINE CALLBACKS
+      timeline.eventCallback( 'onUpdate', update );
+      timeline.eventCallback( 'onComplete', onComplete );
+      timeline.eventCallback( 'onStart', onStart );
+
+      // PROGRESS
+      progressHit.addEventListener( 'mousedown', startSeek );
+
+      // LOOP
+      loopContainer.addEventListener( 'click', loopClickHandler );
+      loopContainer.addEventListener( 'mouseover', loopOverHandler );
+      loopContainer.addEventListener( 'mouseout', loopOutHandler );
+
+      // FPS
+      fpsCheckBoxContainer.addEventListener( 'mouseover', fpsCheckBoxOverHandler );
+      fpsCheckBoxContainer.addEventListener( 'mouseout', fpsCheckBoxOutHandler );
+      fpsCheckBoxContainer.addEventListener( 'click', fpsCheckBoxClickHandler );
+
+      // SPEED
+      speedMenuContainer.addEventListener( "mouseover", speedContainerOverHandler );
+      speedMenuContainer.addEventListener( "mouseout", speedMenuOutHandler );
+    };
+
+  /* ADD LABELS */
+    var addFrameLabels = function() {
+      // get the labels from the timeline
+      var labels = timeline.getLabelsArray();
+      var name, time, value, html;
+      for( var i = 0; i < labels.length; i++ ) { // for each label
+        name = labels[ i ].name;  // get the name of the label
+        time = labels[ i ].time;  // get the time of the label
+
+        // value is used to set the position of the label
+        value = Math.floor( time/timeline.duration() * 100 );
+        
+        var div = document.createElement( 'div' );
+        div.className = "frameMarker";
+        div.style.left = value + "%";
+        div.id = name;
+        div.innerHTML = 
+          '<label class="expandable">'+ name + '</label>'+
+          '<div class="marker" id="'+ name + '"></div>';
+
+        div.addEventListener( 'click', frameMarkerClickHandler );
+
+        var label = document.createElement( 'label' );
+        label.className = "expandable";
+
+        labelsContainer.appendChild( div );
+      }
+
+    };
+
+  /* ***** INIT ***** */
+    var init = function() {
+    // main container
+      container = createDomElement( document.body, "tc-container" );
+
+    // controller
+      controller = createDomElement( container, "tc-controller" );
+
+    // info
+      info = createDomElement( container, "tc-info" );
+      info.innerHTML = "GSAP Timeline Controller";
+
+    // controls
+      controls = createDomElement( container, "tc-controls" );
+
+    // play toggle
+      playButton = createDomElement( controls, "tc-playButton" );
+      playButton.className = "group";
+      playButton.innerHTML = 
+        '<a id="play">'+
+          '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="8px" height="16px" viewBox="0 0 8 16" enable-background="new 0 0 8 16" xml:space="preserve"><path class="tc-play-icon" fill="#FF00CC" d="M0,0l8,8l-8,8V0z"/><path class="tc-pause-icon" fill="#FF00CC" d="M8,16H5V0h3V16z"/><path class="tc-pause-icon" fill="#FF00CC" d="M3,16H0V0h3V16z"/></svg>'+
+        '</a>';
+
+    // time
+      time = createDomElement( controls, "tc-time" );
+      time.className = "group";
+      time.innerHTML = 
+        '<div class="static">'+
+          '<span id="currentTime">00:00</span>'+
+          '<span id="totalTime">00:00</span>'+
+        '</div>';
+      currentTime = document.getElementById( 'currentTime' );
+      totalTime = document.getElementById( 'totalTime' );
+
+    // progress
+      progressContainer = createDomElement( controls, "tc-progressContainer" );
+      progressContainer.className = "group";
+      progressContainer.innerHTML = 
+        '<div class="static" id="rangeContainer">'+
+          '<div id="rangeBg"></div>'+
+          '<div id="seekFill"></div>'+
+          '<div id="seekDrag"></div>'+
+          '<div id="progressHit"></div>'+
+          '<div id="labelsContainer"></div>'+
+        '</div>';
+      rangeContainer = document.getElementById( 'rangeContainer' );
+      rangeBg = document.getElementById( 'rangeBg' );
+      seekFill = document.getElementById( 'seekFill' );
+      seekDrag = document.getElementById( 'seekDrag' );
+      progressHit = document.getElementById( 'progressHit' );
+
+    //loop
+      loopContainer = createDomElement( controls, "tc-loopContainer" );
+      loopContainer.className = "group";
+      loopContainer.innerHTML = 
+        '<div class="static">'+
+          '<svg version="1.1" id="loopIcon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="25px" height="17px" viewBox="0 0 25 17" enable-background="new 0 0 25 17" xml:space="preserve">'+
+            '<path fill="#FF00CC" d="M19.5,4.7h-3.8v2.8h3v4.2H6.3V7.5h4.2v2.2l4-3.6l-4-3.6v2.2h-5c-1.1,0-2,0.9-2,2v5.8c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V6.7C21.5,5.6,20.6,4.7,19.5,4.7z"/>'+
+          '</svg>'+
+        '</div>';
+
+    //speed
+      speedContainer = createDomElement( controls, "tc-speedContainer" );
+      speedContainer.className = "group";
+      speedContainer.innerHTML = 
+        '<div class="static">'+
+          '<div id="speedMenuContainer">'+
+            '<div id="selectedSpeed">1x</div>'+
+            '<ul id="speedMenu"></ul>'+
+          '</div>'+
+        '</div>';
+
+      speedMenu = document.getElementById( "speedMenu" );
+      speedMenuContainer = document.getElementById( "speedMenuContainer" );
+
+    // create the speed menu
+      for( var i=0; i<speeds.length; i++ ){
+        var li = document.createElement( 'li' );
+        li.value = i;
+        if( li.value === 1 ) li.className = "selected";
+        li.innerHTML = speeds[ i ];
+        li.addEventListener( 'click', speedMenuClickHandler );
+        speedItems.push( li );
+        document.getElementById( 'speedMenu' ).appendChild( li );
+      }
+
+    // fps
+      fpsinfo = createDomElement( container, "tc-fpsinfo" );
+      fpsinfo.innerHTML = "FPS Meter :";
+      
+      fpsCheckBoxContainer = createDomElement( container, "tc-fpsCheckBoxContainer" );
+      var fpsCheck = createDomElement( fpsCheckBoxContainer, "fpsCheck" );
+
+      fpsMeterContainer = createDomElement( container, 'tc-fpsMeterContainer' );
+    };
+
+/* ****************** */
+    init();
+    addListeners();
+    updateDuration();
+    addFrameLabels();
+/* ****************** */
+
+    // called when the timeline updates
+    function update() {
+      var t = timeline.time();
+      var d = timeline.duration();
+      var p = Math.round( (t/d) * (rangeBg.offsetWidth) );
+      var offset = p-2 + "px";
+
+      // update the progress bar
+      seekFill.style.width = offset;
+      // update the drag position
+      seekDrag.style.left = offset;
+      // update the time display
+      updateTime();
+    }
+
+    // called when the timeline starts and every time it restarts
+    function onStart() {
+      complete = false;
+      updatePlayIcon();
+    }
+
+    // called then the timeline completes
+    function onComplete() {
+      if( looping === true ) {
+        timeline.restart();
+      } else {
+        complete = true;
+        updatePlayIcon();
+      }
+    }
+
+    function updateTime() {
+      var time = timeline.time();
+      var sec = Math.floor( time );
+      var mil = ( time%1 ).toFixed( 2 ).substring( 2 );
+      totalTime.innerHTML = sec + ":" + mil;
+    }
+
+    function updateDuration() {
+      var dur = timeline.duration();
+      var sec = Math.floor( dur );
+      var mil = ( dur%1 ).toFixed( 2 ).substring( 2 );
+      currentTime.innerHTML = sec + ":" + mil;
+    }
+
+  /* PLAY HANDLERS */
+    function playButtonClickHandler() {
+      if( timeline.paused() ) {
+        timeline.play();
+        paused = false;
+      } else if( complete === true ) {
+        timeline.restart();
+        paused = false;
+      } else {
+        timeline.pause();
+        paused = true;
+      }
+      updatePlayIcon();
+    }
+    function playButtonOverHandler() {
+      if( paused === true || complete === true ) TweenMax.to( ".tc-play-icon", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
+      else TweenMax.to( ".tc-pause-icon", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
+      TweenMax.to( "#tc-playButton > a", 0.2, { backgroundColor:"rgba(0,0,0,1)", ease:Power2.easeOut } );
+    }
+    function playButtonOutHandler() {
+      if( paused === true || complete === true ) TweenMax.to( ".tc-play-icon", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
+      else TweenMax.to( ".tc-pause-icon", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
+      TweenMax.to( "#tc-playButton > a", 0.2, { backgroundColor:"rgba(0,0,0,0.6)", ease:Power2.easeOut } );
+    }
+    function updatePlayIcon() {
+      if( paused === true || complete === true ) {
+        TweenMax.set( ".tc-play-icon", { autoAlpha:1 } );
+        TweenMax.set( ".tc-pause-icon", { autoAlpha:0 } );
+      } else {
+        TweenMax.set( ".tc-play-icon", { autoAlpha:0 } );
+        TweenMax.set( ".tc-pause-icon", { autoAlpha:1 } );
+      }
+    }
+
+  /* SEEK HANDLERS */
+    function seek( time, pause ){
+      if( typeof time === "string" ) {
+        timeline.seek( time );
+        if( pause ) timeline.pause();
+        update();
+      } 
+      if( time >= 0 && time <= timeline.totalDuration() ) {
+        timeline.seek( time );
+        if( pause ) timeline.pause();
+        update();
+      }
+    }
+    function startSeek( e ){
+      progressOffsetX = e.pageX - e.offsetX;
+      document.body.addEventListener( 'mousemove', seekMouseMoveHandler );
+      document.body.addEventListener( 'mouseup', seekMouseUpHandler );
+      seekMouseMoveHandler( e );
+    }
+    function seekMouseMoveHandler( e ) {
+      var w = rangeBg.offsetWidth;
+      var x = e.pageX - progressOffsetX;
+      var p = x/w;
+      var t = timeline.totalDuration() * p;
+      seek( t, true );
+    }
+    function seekMouseUpHandler( e ) {
+      document.body.removeEventListener( 'mousemove', seekMouseMoveHandler );
+      document.body.removeEventListener( 'mouseup', seekMouseUpHandler );
+      if( paused === false ) timeline.resume();
+    }
+
+  /* LOOP HANDLERS */
+    function loopClickHandler( e ) {
+      if( looping === true ){
+        TweenMax.to( "#loopIcon > path", 0.2, { fill:"#666666", ease:Power2.easeOut } );
+        looping = false;
+      } else {
+        TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
+        looping = true;
+      }
+    }
+    function loopOverHandler() {
+      TweenMax.to( "#tc-loopContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,1)", ease:Power2.easeOut } );
+      TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
+    }
+    function loopOutHandler() {
+      if( looping === true ) TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
+      else TweenMax.to( "#loopIcon > path", 0.2, { fill:"#666666", ease:Power2.easeOut } );
+      TweenMax.to( "#tc-loopContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,0.6)", ease:Power2.easeOut } );
+    }
+  
+  /* SPEED HANDLERS */
+    function speedMenuClickHandler( e ) {
+      var clickeditem = e.target;
+      var spd = e.target.innerHTML;
+      var re = /x$/;
+      spd = spd.replace(re, "");
+      spd = spd * 1;
+      setTimeScale( spd );
+
+      speedItems.forEach(function( item, index ){
+        item.className = "";
+        if( index === clickeditem.value ) {
+          item.className = "selected";
+          document.getElementById( "selectedSpeed" ).innerHTML = item.innerHTML;
+        }
+      })
+    }
+    function speedContainerOverHandler() {
+      TweenMax.set("#speedMenu", { display:"block" } );
+      TweenMax.to( "#tc-speedContainer > .static", 0.25, { backgroundColor:"rgba(0,0,0,1)", ease:Power2.easeIn } );
+      TweenMax.to( "#speedMenu", 0.25, { height:"95px", ease:Power2.easeOut } );
+    }
+    function speedMenuOutHandler() {
+      TweenMax.to( "#tc-speedContainer > .static", 0.25, { backgroundColor:"rgba(0,0,0,0.6)", ease:Power2.easeOut } );
+      TweenMax.to( "#speedMenu", 0.25, { height:"0px", ease:Power2.easeOut, onComplete:function(){ TweenMax.set("#speedMenu", {display:"none"}) } } );
+    }
+
+  /* FRAME MARKER HANDLERS */
+    function frameMarkerOverHandler( e ){
+      var marker = e.target;
+      e.target.style.borderLeft = "2px solid white";
+    }
+    function frameMarkerOutHandler( e ){
+      var marker = e.target;
+      e.target.style.borderLeft = "2px solid #00CCFF";
+    }
+    function frameMarkerClickHandler( e ) {
+      seek( e.target.id );
+    }
+
+  /* FPS HANDLERS */
+    function fpsCheckBoxClickHandler() {
+      if( fpsChecked === true ) {
+        fpsChecked = false;
+        TweenMax.to( "#fpsCheck", 0.2, { borderColor:"rgba(255,255,255,0.4)", ease:Power2.easeInOut } );
+        hideFpsMeter();
+      } else {
+        fpsChecked = true;
+        TweenMax.to( "#fpsCheck", 0.2, { borderColor:"rgba(255,0,204,1)", ease:Power2.easeInOut } )
+        showFpsMeter();
+      }
+    }
+    function fpsCheckBoxOverHandler() {
+      TweenMax.to( "#fpsCheck", 0.2, { borderColor:"rgba(255,255,255,1)", ease:Power2.easeOut } );
+    }
+    function fpsCheckBoxOutHandler() {
+      if( fpsChecked === true ) {
+        TweenMax.to( "#fpsCheck", 0.2, { borderColor:"rgba(255,0,204,1)", ease:Power2.easeOut } );
+      } else {
+        TweenMax.to( "#fpsCheck", 0.2, { borderColor:"rgba(255,255,255,0.4)", ease:Power2.easeOut } );
+      }
+    }
+    function showFpsMeter() {
+      stats = new Stats();
+      stats.domElement.style.cssText = 'position:absolute;';
+      fpsMeterContainer.style.opacity = "0";
+      fpsMeterContainer.appendChild( stats.domElement );
+
+      TweenMax.to( "#tc-container", 0.35, { height:"160px", ease:Power2.easeOut } );
+      TweenMax.to( fpsMeterContainer, 0.2, { autoAlpha:1, delay:0.3 } );
+
+      requestAnimationFrame(function loop(){
+        if( fpsChecked === true ) {
+          stats.update();
+          requestAnimationFrame( loop );
+        }
+      });
+    };
+    function hideFpsMeter() {
+      fpsMeterContainer.innerHTML = "";
+      TweenMax.to( "#tc-container", 0.35, { height:"100px", ease:Power2.easeOut } );
+      stats = null;
+    };
+
+    function setTimeScale( speed ) {
+      timeline.restart();
+      timeline.timeScale( speed );
+      paused = false;
+      updatePlayIcon();
+    }
+
+  // Public functions
+
     var position = {
       set x( val ) {
         container.style.left = val + "px";
@@ -412,390 +806,6 @@ var controller = function( timeline ) {
         container.style.height = val + "px";
       }
     };
-
-    var createDomElement = function( container, id ) {
-      var div = document.createElement( 'div' );
-      if( id ) div.id = id;
-      container.appendChild( div );
-      return div;
-    };
-
-    var addListeners = function() {
-      playButton.addEventListener( 'click', playButtonClickHandler );
-      playButton.addEventListener( 'mouseover', playButtonOverHandler );
-      playButton.addEventListener( 'mouseout', playButtonOutHandler );
-
-      timeline.eventCallback( 'onUpdate', update );
-      timeline.eventCallback( 'onComplete', onComplete );
-      timeline.eventCallback( 'onStart', onStart );
-
-      progressHit.addEventListener( 'mousedown', startSeek );
-
-      loopContainer.addEventListener( 'click', loopClickHandler );
-      loopContainer.addEventListener( 'mouseover', loopOverHandler );
-      loopContainer.addEventListener( 'mouseout', loopOutHandler );
-
-      fpsCheckBoxContainer.addEventListener( 'mouseover', fpsCheckBoxOverHandler );
-      fpsCheckBoxContainer.addEventListener( 'mouseout', fpsCheckBoxOutHandler );
-      fpsCheckBoxContainer.addEventListener( 'click', fpsCheckBoxClickHandler );
-
-      speedMenuContainer.addEventListener( "mouseover", speedContainerOverHandler );
-    };
-
-    var addFrameLabels = function() {
-      var labels = timeline.getLabelsArray();
-      var name, time, value, html;
-      for (var i = 0; i < labels.length; i++) {
-        name = labels[ i ].name;
-        time = labels[ i ].time;
-        value = Math.floor( (time/timeline.duration()) * 100 );
-        var div = document.createElement( 'div' );
-        div.className = "frameMarker";
-        div.style.left = value + "%";
-        div.id = name;
-        div.innerHTML = 
-          '<label class="expandable">'+ name + '</label>'+
-          '<div class="marker" id="'+ name + '"></div>';
-        div.addEventListener( 'click', frameMarkerClickHandler );
-        var label = document.createElement('label');
-        label.className = "expandable";
-
-        labelsContainer.appendChild( div );
-      }
-    };
-
-    var init = function() {
-      // create main container
-      container = createDomElement( document.body, "tc-container" );
-
-      // controller
-      controller = createDomElement( container, "tc-controller" );
-
-      // info
-      info = createDomElement( container, "tc-info" );
-      info.innerHTML = "GSAP Timeline Controller";
-      // controls
-      controls = createDomElement( container, "tc-controls" );
-
-      // play toggle
-      playButton = createDomElement( controls, "tc-playButton" );
-      playButton.className = "group";
-      playButton.innerHTML = 
-        '<a id="play">'+
-          '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="8px" height="16px" viewBox="0 0 8 16" enable-background="new 0 0 8 16" xml:space="preserve"><path class="tc-play-icon" fill="#FF00CC" d="M0,0l8,8l-8,8V0z"/><path class="tc-pause-icon" fill="#FF00CC" d="M8,16H5V0h3V16z"/><path class="tc-pause-icon" fill="#FF00CC" d="M3,16H0V0h3V16z"/></svg>'+
-        '</a>';
-
-      // time
-      time = createDomElement( controls, "tc-time" );
-      time.className = "group";
-      time.innerHTML = 
-        '<div class="static">'+
-          '<span id="currentTime">00:00</span>'+
-          '<span id="totalTime">00:00</span>'+
-        '</div>';
-      currentTime = document.getElementById( 'currentTime' );
-      totalTime = document.getElementById( 'totalTime' );
-
-      // progress
-      progressContainer = createDomElement( controls, "tc-progressContainer" );
-      progressContainer.className = "group";
-      progressContainer.innerHTML = 
-        '<div class="static" id="rangeContainer">'+
-          '<div id="rangeBg"></div>'+
-          '<div id="seekFill"></div>'+
-          '<div id="seekDrag"></div>'+
-          '<div id="progressHit"></div>'+
-          '<div id="labelsContainer"></div>'+
-        '</div>';
-      rangeContainer = document.getElementById( 'rangeContainer' );
-      rangeBg = document.getElementById( 'rangeBg' );
-      seekFill = document.getElementById( 'seekFill' );
-      seekDrag = document.getElementById( 'seekDrag' );
-      progressHit = document.getElementById( 'progressHit' );
-
-      //loop
-      loopContainer = createDomElement( controls, "tc-loopContainer" );
-      loopContainer.className = "group";
-      loopContainer.innerHTML = 
-        '<div class="static">'+
-          '<svg version="1.1" id="loopIcon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="25px" height="17px" viewBox="0 0 25 17" enable-background="new 0 0 25 17" xml:space="preserve">'+
-            '<path fill="#FF00CC" d="M19.5,4.7h-3.8v2.8h3v4.2H6.3V7.5h4.2v2.2l4-3.6l-4-3.6v2.2h-5c-1.1,0-2,0.9-2,2v5.8c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V6.7C21.5,5.6,20.6,4.7,19.5,4.7z"/>'+
-          '</svg>'+
-        '</div>';
-
-      //speed
-      speedContainer = createDomElement( controls, "tc-speedContainer" );
-      speedContainer.className = "group";
-      speedContainer.innerHTML = 
-        '<div class="static">'+
-          '<div id="speedMenuContainer">'+
-            '<div id="selectedSpeed">1x</div>'+
-            '<ul id="speedMenu"></ul>'+
-          '</div>'+
-        '</div>';
-
-      speedMenu = document.getElementById( "speedMenu" );
-      speedMenuContainer = document.getElementById( "speedMenuContainer" );
-
-      for( var i=0; i<speeds.length; i++ ){
-        var li = document.createElement( 'li' );
-        li.value = i;
-        if ( li.value === 1 ) li.className = "selected";
-        li.innerHTML = speeds[i];
-        li.addEventListener( 'click', speedMenuClickHandler );
-        speedItems.push( li );
-        document.getElementById('speedMenu').appendChild(li);
-      }
-
-      // fps
-      fpsinfo = createDomElement( container, "tc-fpsinfo" );
-      fpsinfo.innerHTML = "FPS Meter :";
-      
-      fpsCheckBoxContainer = createDomElement( container, "tc-fpsCheckBoxContainer" );
-      var fpsCheck = createDomElement( fpsCheckBoxContainer, "fpsCheck" );
-
-      fpsMeterContainer = createDomElement( container, 'tc-fpsMeterContainer' );
-
-    };
-
-    init();
-    addListeners();
-    updateDuration();
-    addFrameLabels();
-
-    function update() {
-      var t = timeline.time();
-      var d = timeline.duration();
-      var p = Math.round((t/d)*(rangeBg.offsetWidth));
-      seekFill.style.width = p-2 + "px";
-      seekDrag.style.left = p-2 + "px";
-      updateTime();
-    }
-
-    function onStart() {
-      complete = false;
-      updatePlayIcon();
-    }
-
-    function onComplete() {
-      if( looping === true ) {
-        timeline.restart();
-      } else {
-        complete = true;
-        updatePlayIcon();
-      }
-    }
-
-    function playButtonClickHandler() {
-      if( timeline.paused() ) {
-        timeline.play();
-        paused = false;
-      } else if( complete === true ) {
-        timeline.restart();
-        paused = false;
-      } else {
-        timeline.pause();
-        paused = true;
-      }
-      updatePlayIcon();
-    }
-
-    function playButtonOverHandler() {
-      if( paused === true || complete === true ) TweenMax.to( ".tc-play-icon", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
-      else TweenMax.to( ".tc-pause-icon", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
-      TweenMax.to( "#tc-playButton > a", 0.2, { backgroundColor:"rgba(0,0,0,1)", ease:Power2.easeOut } );
-    }
-
-    function playButtonOutHandler() {
-      if( paused === true || complete === true ) TweenMax.to( ".tc-play-icon", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
-      else TweenMax.to( ".tc-pause-icon", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
-      TweenMax.to( "#tc-playButton > a", 0.2, { backgroundColor:"rgba(0,0,0,0.6)", ease:Power2.easeOut } );
-    }
-
-    function updatePlayIcon() {
-      if( paused === true || complete === true ) {
-        TweenMax.set( ".tc-play-icon", { autoAlpha:1 } );
-        TweenMax.set( ".tc-pause-icon", { autoAlpha:0 } );
-      } else {
-        TweenMax.set( ".tc-play-icon", { autoAlpha:0 } );
-        TweenMax.set( ".tc-pause-icon", { autoAlpha:1 } );
-      }
-    }
-
-    function updateTime() {
-      var time = timeline.time();
-      var sec = Math.floor( time );
-      var mil = (time % 1).toFixed(2).substring(2);
-      totalTime.innerHTML = sec + ":" + mil;
-    }
-
-    function updateDuration() {
-      var dur = timeline.duration();
-      var sec = Math.floor( dur );
-      var mil = (dur % 1).toFixed(2).substring(2);
-      currentTime.innerHTML = sec + ":" + mil;
-    }
-
-    function seek( time, pause ){
-      if( typeof time === "string" ) {
-        timeline.seek( time );
-        if( pause ) timeline.pause();
-        update();
-      } 
-      if( time >= 0 && time <= timeline.totalDuration() ) {
-        timeline.seek( time );
-        if( pause ) timeline.pause();
-        update();
-      }
-    }
-
-    function startSeek( e ){
-      progressOffsetX = e.pageX - e.offsetX;
-      document.body.addEventListener( 'mousemove', seekMouseMoveHandler );
-      document.body.addEventListener( 'mouseup', seekMouseUpHandler );
-      seekMouseMoveHandler( e );
-    }
-
-    function seekMouseMoveHandler( e ) {
-      var w = rangeBg.offsetWidth;
-      var x = e.pageX - progressOffsetX;
-      var p = x/w;
-      var t = timeline.totalDuration() * p;
-      seek( t, true );
-    }
-
-    function seekMouseUpHandler( e ) {
-      document.body.removeEventListener( 'mousemove', seekMouseMoveHandler );
-      document.body.removeEventListener( 'mouseup', seekMouseUpHandler );
-      if( paused === false ) timeline.resume();
-    }
-
-    function loopClickHandler( e ) {
-      if( looping === true ){
-        TweenMax.to( "#loopIcon > path", 0.2, { fill:"#666666", ease:Power2.easeOut } );
-        looping = false;
-      } else {
-        TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
-        looping = true;
-      }
-    }
-
-    function loopOverHandler() {
-      TweenMax.to( "#tc-loopContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,1)", ease:Power2.easeOut } );
-      TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FFFFFF", ease:Power2.easeOut } );
-    }
-
-    function loopOutHandler() {
-      if( looping === true ) TweenMax.to( "#loopIcon > path", 0.2, { fill:"#FF00CC", ease:Power2.easeOut } );
-      else TweenMax.to( "#loopIcon > path", 0.2, { fill:"#666666", ease:Power2.easeOut } );
-      TweenMax.to( "#tc-loopContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,0.6)", ease:Power2.easeOut } );
-    }
-
-    function speedMenuClickHandler( e ) {
-      var clickeditem = e.target;
-      var spd = e.target.innerHTML;
-      var re = /x$/;
-      spd = spd.replace(re, "");
-      spd = spd * 1;
-      setTimeScale( spd );
-
-      speedItems.forEach(function( item, index ){
-        item.className = "";
-        if( index === clickeditem.value) {
-          item.className = "selected";
-          document.getElementById( "selectedSpeed" ).innerHTML = item.innerHTML;
-        }
-      })
-    }
-
-    function speedContainerOverHandler() {
-      speedMenuContainer.addEventListener( "mouseout", speedMenuOutHandler );
-      showSpeedMenu();
-    }
-
-    function speedMenuOutHandler() {
-      hideSpeedMenu();
-    }
-
-    function showSpeedMenu() {
-      TweenMax.set("#speedMenu", { display:"block" })
-      TweenMax.to( "#tc-speedContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,1)", ease:Power2.easeInOut } );
-      TweenMax.to( "#speedMenu", 0.2, { height:"95px", ease:Power2.easeOut } );
-    }
-
-    function hideSpeedMenu() {
-      TweenMax.to( "#tc-speedContainer > .static", 0.2, { backgroundColor:"rgba(0,0,0,0.6)", ease:Power2.easeInOut } );
-      TweenMax.to( "#speedMenu", 0.2, { height:"0px", ease:Power2.easeOut, onComplete:function(){ TweenMax.set("#speedMenu", {display:"none"}) } } );
-    }
-
-    function frameMarkerOverHandler( e ){
-      var marker = e.target;
-      e.target.style.borderLeft = "2px solid white";
-    }
-
-    function frameMarkerOutHandler( e ){
-      var marker = e.target;
-      e.target.style.borderLeft = "2px solid #00CCFF";
-    }
-
-    function frameMarkerClickHandler( e ) {
-      seek( e.target.id );
-    }
-
-    function fpsCheckBoxClickHandler() {
-      if( fpsChecked === true ) {
-        fpsChecked = false;
-        TweenMax.to( "#fpsCheck", 0.2, { borderColor:"rgba(255,255,255,0.4)", ease:Power2.easeInOut } );
-        hideFpsMeter();
-      } else {
-        fpsChecked = true;
-        TweenMax.to( "#fpsCheck", 0.2, { borderColor:"rgba(255,0,204,1)", ease:Power2.easeInOut } )
-        showFpsMeter();
-      }
-    }
-
-    function fpsCheckBoxOverHandler() {
-      TweenMax.to( "#fpsCheck", 0.2, { borderColor:"rgba(255,255,255,1)", ease:Power2.easeOut } );
-    }
-
-    function fpsCheckBoxOutHandler() {
-      if( fpsChecked === true ) {
-        TweenMax.to( "#fpsCheck", 0.2, { borderColor:"rgba(255,0,204,1)", ease:Power2.easeOut } );
-      } else {
-        TweenMax.to( "#fpsCheck", 0.2, { borderColor:"rgba(255,255,255,0.4)", ease:Power2.easeOut } );
-      }
-    }
-
-    function showFpsMeter() {
-      stats = new Stats();
-      stats.domElement.style.cssText = 'position:absolute;';
-      fpsMeterContainer.style.opacity = "0";
-      fpsMeterContainer.appendChild( stats.domElement );
-
-      TweenMax.to( "#tc-container", 0.35, { height:"160px", ease:Power2.easeOut } );
-      TweenMax.to( fpsMeterContainer, 0.2, { autoAlpha:1, delay:0.3 } );
-
-
-      requestAnimationFrame(function loop(){
-        if( fpsChecked === true ) {
-          stats.update();
-          requestAnimationFrame(loop);
-        }
-      });
-    };
-
-    function hideFpsMeter() {
-      fpsMeterContainer.innerHTML = "";
-      TweenMax.to( "#tc-container", 0.35, { height:"100px", ease:Power2.easeOut } );
-      stats = null;
-    };
-
-    function setTimeScale( speed ) {
-      timeline.restart();
-      timeline.timeScale( speed );
-      paused = false;
-      updatePlayIcon();
-    }
 
     return {
       position:position,
